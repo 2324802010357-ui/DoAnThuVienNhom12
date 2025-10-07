@@ -1,0 +1,50 @@
+﻿@{
+    ViewBag.Title = "Đăng nhập";
+}
+
+<div class="row" style="margin-top:30px;">
+    <div class="col-sm-6 col-md-4 col-sm-offset-3 col-md-offset-4">
+        <div class="panel panel-default">
+            <div class="panel-heading text-center">
+                <h3 class="panel-title"><i class="fa fa-sign-in"></i> Đăng nhập</h3>
+            </div>
+            <div class="panel-body">
+                <form class="form" onsubmit="return false;">
+                    <div class="form-group">
+                        <label>Email / Tên đăng nhập</label>
+                        <input class="form-control" placeholder="email@domain.com hoặc username">
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu</label>
+                        <div class="input-group">
+                            <input id="pwd" type="password" class="form-control" placeholder="••••••">
+                            <span class="input-group-btn">
+                                <button type="button" id="togglePwd" class="btn btn-default" title="Hiện/ẩn mật khẩu">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox"> Ghi nhớ đăng nhập</label>
+                    </div>
+                    <button class="btn btn-primary btn-block"><i class="fa fa-unlock"></i> Đăng nhập (UI)</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        (function () {
+            var b = document.getElementById("togglePwd"), i = document.getElementById("pwd");
+            if (b && i) {
+                b.addEventListener("click", function () {
+                    i.type = (i.type === "password") ? "text" : "password";
+                    this.firstElementChild.className = (i.type === "password") ? "fa fa-eye" : "fa fa-eye-slash";
+                });
+            }
+        })();
+    </script>
+}

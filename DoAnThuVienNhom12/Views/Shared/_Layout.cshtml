@@ -1,0 +1,107 @@
+﻿@{
+    Layout = null;
+    var title = ViewBag.Title ?? "DoAnThuVienNhom12";
+}
+
+@functions{
+    // helper: gán class "active" theo controller/action hiện tại
+    public string IsActive(string ctrl, string act = null)
+    {
+        var rd = ViewContext.RouteData.Values;
+        var c = (rd["controller"] ?? "").ToString();
+        var a = (rd["action"] ?? "").ToString();
+        if (!string.IsNullOrEmpty(act))
+            return (c.Equals(ctrl, System.StringComparison.OrdinalIgnoreCase)
+                 && a.Equals(act, System.StringComparison.OrdinalIgnoreCase)) ? "active" : "";
+        return c.Equals(ctrl, System.StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title</title>
+
+    <!-- Bootstrap 3.4.1 + Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+    <!-- jQuery UI CSS (cho Autocomplete/Slider dùng trong Phiếu) -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+
+    <!-- CSS của dự án -->
+    <link rel="stylesheet" href="@Url.Content("~/Content/site.css")" />
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mainNav">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="@Url.Action("Index","Home")">
+                    <i class="fa fa-book"></i> DoAnThuVienNhom12
+                </a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="nav navbar-nav">
+                    <li class="@IsActive("Home","Index")">
+                        <a href="@Url.Action("Index","Home")">Trang chủ</a>
+                    </li>
+
+                    <li class="@IsActive("DanhMuc")">
+                        <a href="@Url.Action("Index","DanhMuc")">Danh mục</a>
+                    </li>
+
+                    <li class="@IsActive("Sach")">
+                        <a href="@Url.Action("Index","Sach")">Sách</a>
+                    </li>
+                    <li class="dropdown @(IsActive("MuonTra","PhieuMuon")== "active" || IsActive("MuonTra","PhieuTra")== "active" ? "active" : "")">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true">
+                            <i class="fa fa-file-text-o"></i> Phiếu <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="@IsActive("MuonTra","PhieuMuon")">
+                                <a href="@Url.Action("PhieuMuon","MuonTra")"><i class="fa fa-download"></i> Phiếu mượn</a>
+                            </li>
+                            <li class="@IsActive("MuonTra","PhieuTra")">
+                                <a href="@Url.Action("PhieuTra","MuonTra")"><i class="fa fa-upload"></i> Phiếu trả</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="@IsActive("NguoiDung")">
+                        <a href="@Url.Action("Index","NguoiDung")">Đăng nhập</a>
+                    </li>
+
+                    <li class="@IsActive("NhanVien")">
+                        <a href="@Url.Action("Index","NhanVien")">Nhân sự</a>
+                    </li>
+                </ul>
+
+                @* thêm phần user dropdown/ search ... nếu cần *@
+            </div>
+        </div>
+    </nav>
+
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer class="text-muted">
+            <p class="text-center">&copy; @DateTime.Now.Year DoAnThuVienNhom12</p>
+        </footer>
+    </div>
+
+    <!-- jQuery + Bootstrap + jQuery UI (đặt cuối body) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <!-- Lưu ý: dùng "Scripts" viết hoa để khớp với các view -->
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

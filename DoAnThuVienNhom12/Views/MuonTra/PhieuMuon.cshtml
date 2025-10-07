@@ -1,0 +1,180 @@
+﻿@{
+    ViewBag.Title = "Phiếu mượn";
+}
+<style>
+    .ui-autocomplete {
+        z-index: 3000
+    }
+
+    .table > tbody > tr > td {
+        vertical-align: middle
+    }
+
+    .badge-soft {
+        background: #eef2ff;
+        color: #1f2a56;
+        border: 1px solid #cdd5ff
+    }
+
+    .total-box {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 8px 10px
+    }
+
+    hr.dashed {
+        border-top: 1px dashed #e5e7eb
+    }
+
+    .item-actions .btn {
+        padding: 3px 8px
+    }
+
+    .text-muted-small {
+        color: #778;
+        font-size: 12px
+    }
+</style>
+
+<div class="row" style="margin-top:10px;">
+    <div class="col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong><i class="glyphicon glyphicon-list-alt"></i> Phiếu mượn</strong>
+            </div>
+            <div class="panel-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Độc giả:</label>
+                        <div class="col-sm-7">
+                            <input id="brReader" class="form-control" placeholder="Tìm độc giả theo tên/mã..." autocomplete="off">
+                            <span class="help-block text-muted-small">Ví dụ: “DG001”, “Nguyễn Văn A”…</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Ngày mượn:</label>
+                        <div class="col-sm-3">
+                            <input id="brBorrowDate" type="date" class="form-control">
+                        </div>
+                        <label class="col-sm-2 control-label">Hạn trả:</label>
+                        <div class="col-sm-3">
+                            <input id="brDueDate" type="date" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="dashed">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tblBorrow">
+                        <thead>
+                            <tr class="active">
+                                <th style="width:110px">Mã sách</th>
+                                <th>Tên sách</th>
+                                <th style="width:140px">Tác giả</th>
+                                <th style="width:110px">Số ĐKCB</th>
+                                <th style="width:90px">SL</th>
+                                <th style="width:120px">Tình trạng</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="text-right">
+                    <button id="btnAddRowBorrow" type="button" class="btn btn-default">
+                        <i class="glyphicon glyphicon-plus"></i> Thêm sách
+                    </button>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-sm-6 text-muted-small">
+                        <span class="badge badge-soft">Quy định mẫu</span>
+                        <ul style="margin-top:8px">
+                            <li>Mỗi phiếu tối đa <strong id="ruleMaxItems">5</strong> cuốn.</li>
+                            <li>Thời hạn mượn mặc định <strong id="ruleDays">14</strong> ngày.</li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="total-box">
+                            <div>SL đầu sách: <strong id="brItemsCount">0</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-right" style="margin-top:12px">
+                    <button class="btn btn-default" type="button" id="brDraft"><i class="glyphicon glyphicon-floppy-disk"></i> Lưu tạm</button>
+                    <button class="btn btn-default" type="button" id="brPrint"><i class="glyphicon glyphicon-print"></i> In phiếu</button>
+                    <button class="btn btn-primary" type="button" id="brSubmit"><i class="glyphicon glyphicon-ok"></i> Xác nhận mượn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+  /* DỮ LIỆU DEMO */
+  var READERS=[{id:'DG001',name:'Nguyễn Văn A'},{id:'DG002',name:'Trần Thị B'},{id:'DG003',name:'Phạm Minh C'}];
+  var BOOKS=[
+    {code:'S001',title:'Lập trình C# nâng cao',author:'Kazami Yuki',reg:'DK001'},
+    {code:'S002',title:'Cấu trúc dữ liệu & GT',author:'Yuki',reg:'DK002'},
+    {code:'S003',title:'Toán cao cấp A1',author:'Nguyễn Nhật Ánh',reg:'DK003'},
+    {code:'S004',title:'Thuật toán ứng dụng',author:'Haruki Murakami',reg:'DK004'}
+  ];
+  var RULE_MAX_ITEMS=5, RULE_DAYS=14;
+  $('#ruleMaxItems').text(RULE_MAX_ITEMS); $('#ruleDays').text(RULE_DAYS);
+
+  function todayStr(){return new Date().toISOString().slice(0,10);}
+  function addDaysStr(d,days){var x=new Date(d);x.setDate(x.getDate()+days);return x.toISOString().slice(0,10);}
+  $('#brBorrowDate').val(todayStr());
+  $('#brDueDate').val(addDaysStr($('#brBorrowDate').val(),RULE_DAYS));
+  $('#brBorrowDate').on('change',function(){ $('#brDueDate').val(addDaysStr(this.value||todayStr(),RULE_DAYS)); });
+
+  /* Autocomplete */
+  $('#brReader').autocomplete({
+    minLength:0,
+    source: READERS.map(r=>({label:r.id+' • '+r.name,value:r.name,id:r.id})),
+    select: function(e,ui){ $(this).val(ui.item.value).data('rid',ui.item.id); return false; }
+  }).on('focus', function(){ $(this).autocomplete('search', this.value); });
+
+  function attachBook($code,$title,$author,$reg){
+    var srcByCode=BOOKS.map(b=>({label:b.code+' • '+b.title,value:b.code,data:b}));
+    var srcByTitle=BOOKS.map(b=>({label:b.title,value:b.title,data:b}));
+    $code.autocomplete({minLength:0,source:srcByCode,select:function(e,ui){var b=ui.item.data;$code.val(b.code);$title.val(b.title);$author.val(b.author);$reg.val(b.reg);return false;}})
+         .on('focus',function(){ $(this).autocomplete('search',this.value); });
+    $title.autocomplete({minLength:0,source:srcByTitle,select:function(e,ui){var b=ui.item.data;$code.val(b.code);$title.val(b.title);$author.val(b.author);$reg.val(b.reg);return false;}})
+          .on('focus',function(){ $(this).autocomplete('search',this.value); });
+  }
+
+  /* Bảng mượn */
+  function addBorrowRow(){
+    var tr=$('<tr/>');
+    var tdCode=$('<td/>').append('<input class="form-control input-code" placeholder="Chọn mã..." autocomplete="off">');
+    var tdTitle=$('<td/>').append('<input class="form-control input-title" placeholder="Tên sách..." autocomplete="off">');
+    var tdAuthor=$('<td/>').append('<input class="form-control input-author" placeholder="Tác giả" autocomplete="off">');
+    var tdReg=$('<td/>').append('<input class="form-control input-reg" placeholder="ĐKCB" autocomplete="off">');
+    var tdQty=$('<td/>').append('<input type="number" min="1" value="1" class="form-control input-qty">');
+    var tdCond=$('<td/>').append('<select class="form-control"><option>BT</option><option>Cũ</option></select>');
+    var tdAct=$('<td class="text-center"/>').append('<button type="button" class="btn btn-danger btn-xs remove-row"><i class="glyphicon glyphicon-trash"></i></button>');
+    tr.append(tdCode,tdTitle,tdAuthor,tdReg,tdQty,tdCond,tdAct); $('#tblBorrow tbody').append(tr);
+    attachBook(tdCode.find('input'),tdTitle.find('input'),tdAuthor.find('input'),tdReg.find('input'));
+    updateCount();
+  }
+  function updateCount(){ $('#brItemsCount').text($('#tblBorrow tbody tr').length); }
+  $('#btnAddRowBorrow').on('click',function(){
+    if($('#tblBorrow tbody tr').length>=RULE_MAX_ITEMS){ alert('Tối đa '+RULE_MAX_ITEMS+' đầu sách.'); return; }
+    addBorrowRow();
+  });
+  $('#tblBorrow').on('click','.remove-row',function(){ $(this).closest('tr').remove(); updateCount(); });
+
+  // Khởi tạo
+  addBorrowRow();
+
+  // Demo actions
+  $('#brDraft').on('click', ()=>alert('Lưu tạm (demo)'));
+  $('#brPrint').on('click', ()=>window.print());
+  $('#brSubmit').on('click', ()=>alert('Xác nhận mượn (demo)'));
+})();
+</script>

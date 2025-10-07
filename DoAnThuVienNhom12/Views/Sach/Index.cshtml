@@ -1,0 +1,78 @@
+﻿<script>
+    (function () {
+        /* ... (giữ nguyên tất cả phần trên: Toggle, SUGGEST, attachSuggestRadio, slider, v.v.) ... */
+
+        // ⬇️ CHỈNH: danh sách field tạo pill = CHỈ các ô nâng cao
+        var PILL_FIELDS = [
+            { sel: '#advAuthor', label: 'Tác giả' },
+            { sel: '#advGenre', label: 'Thể loại' },
+            { sel: '#advCategory', label: 'Danh mục' },
+            { sel: '#advPublisher', label: 'NXB' },
+            { sel: '#yearFrom', label: 'Từ năm' },
+            { sel: '#yearTo', label: 'Đến năm' }
+        ];
+
+        function escapeHtml(str) { return (str || '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s])); }
+
+        // 👉 chỉ xoá các field nâng cao
+        function clearAllAdvanced() {
+            PILL_FIELDS.forEach(function (f) { var $el = $(f.sel); if ($el.length) $el.val(''); });
+            if ($('#yearSlider').length) {
+                var SL_MIN = 1900, SL_MAX = new Date().getFullYear();
+                $('#yearSlider').slider('values', [SL_MIN, SL_MAX]);
+            }
+            renderFilterPills();
+            if (typeof buildSummary === 'function') buildSummary();
+        }
+
+        // 👉 render pill từ CÁC Ô NÂNG CAO
+        function renderFilterPills() {
+            var $bar = $('#filterBar').empty();
+            var count = 0;
+
+            PILL_FIELDS.forEach(function (f) {
+                var $el = $(f.sel); if (!$el.length) return;
+                var v = ($el.val() || '').trim();
+                if (!v) return;
+
+                count++;
+                $bar.append(
+                    '<span class="filter-pill" data-sel="' + f.sel + '">'
+                    + '<strong>' + f.label + ':</strong> '
+                    + '<span>' + escapeHtml(v) + '</span> '
+                    + '<button type="button" class="x pill-x" aria-label="Xoá">×</button>'
+                    + '</span>'
+                );
+            });
+
+            if (count > 0) {
+                $bar.append('<button type="button" id="btnClearAllFilters" class="filter-clear">Xoá tất cả</button>');
+            }
+        }
+
+        // ✕: chỉ xoá field nâng cao tương ứng (không đụng ô ở trên)
+        $(document).off('click', '.pill-x').on('click', '.pill-x', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            var sel = $(this).closest('.filter-pill').data('sel');
+            if (sel) { $(sel).val(''); }
+            renderFilterPills();
+            if (typeof buildSummary === 'function') buildSummary();
+        });
+
+        // "Xoá tất cả": chỉ xoá các mục nâng cao phía dưới
+        $(document).off('click', '#btnClearAllFilters').on('click', '#btnClearAllFilters', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            clearAllAdvanced();
+        });
+
+        /* --- phần còn lại giữ nguyên: saved/recent, buildSummary, buildDemoResults, init, reset... --- */
+
+        // Init
+        renderFilterPills(); buildSummary(); buildDemoResults();
+        // Khi gõ ở ô nâng cao thì cập nhật pill ngay (không ảnh hưởng ô ở trên)
+        $('#advAuthor,#advGenre,#advCategory,#advPublisher,#yearFrom,#yearTo').on('input change', function () {
+            renderFilterPills(); buildSummary();
+        });
+
+    })();
+</script>

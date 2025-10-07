@@ -1,0 +1,14 @@
+﻿@model dynamic
+<div class="thumbnail book-card">
+    <img src="@Model.Cover" class="img-responsive" alt="@Model.Title">
+    <div class="caption">
+        <h4 title="@Model.Title">@Model.Title</h4>
+        <p class="text-muted">@Model.Author</p>
+        <p>
+            <a class="btn btn-success btn-sm" href="@Url.Action("Detail","Sach", new { id = Model.Id })">
+                <i class="fa fa-info-circle"></i> Chi tiết
+            </a>
+            <button class="btn btn-default btn-sm" disabled><i class="fa fa-plus"></i> Thêm (UI)</button>
+        </p>
+    </div>
+</div>

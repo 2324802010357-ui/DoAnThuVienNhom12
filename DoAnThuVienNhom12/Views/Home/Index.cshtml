@@ -1,0 +1,28 @@
+﻿@{ ViewBag.Title = "Trang chủ"; }
+
+<div class="jumbotron hero">
+    <h1>Open Library</h1>
+    <p class="lead">Tri Thức Là Sức Mạnh.</p>
+    <p><a class="btn btn-primary btn-lg" href="@Url.Action("Index","Sach")"><i class="fa fa-book"></i> Khám phá sách</a></p>
+</div>
+
+<h3 class="section-title">Sách mới</h3>
+<hr />
+<div class="row">
+    @for (int i = 0; i < 6; i++)
+    {
+        <div class="col-sm-4 col-md-3">
+            <div class="thumbnail">
+                <img src="https://placehold.co/300x400?text=Book+@(i+1)" class="img-responsive" />
+                <div class="capti   on">
+                    <h4>Tựa sách @(i+1)</h4>
+                    <p>Tác giả A</p>
+                    <p>
+                        <a href="#" class="btn btn-success btn-sm"><i class="fa fa-info-circle"></i> Chi tiết</a>
+                        <a href="#" class="btn btn-default btn-sm"><i class="fa fa-plus"></i> Thêm</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
