@@ -1,28 +1,258 @@
 ﻿@{ ViewBag.Title = "Trang chủ"; }
 
-<div class="jumbotron hero">
-    <h1>Open Library</h1>
-    <p class="lead">Tri Thức Là Sức Mạnh.</p>
-    <p><a class="btn btn-primary btn-lg" href="@Url.Action("Index","Sach")"><i class="fa fa-book"></i> Khám phá sách</a></p>
-</div>
+<div class="animate-fade-in">
+    <!-- Hero Section -->
+    <div class="jumbotron hero">
+        <div class="container">
+            <h1><i class="fa fa-book"></i> Thư viện Điện tử</h1>
+            <p class="lead">Tri thức là sức mạnh - Kho tàng kiến thức bất tận đang chờ bạn khám phá</p>
+            <div style="margin-top: 30px;">
+                <a class="btn btn-primary btn-lg" href="@Url.Action("Index","Sach")" style="margin-right: 15px;">
+                    <i class="fa fa-search"></i> Tìm kiếm sách
+                </a>
+                <a class="btn btn-default btn-lg" href="@Url.Action("PhieuMuon","MuonTra")">
+                    <i class="fa fa-plus"></i> Tạo phiếu mượn
+                </a>
+            </div>
+        </div>
+    </div>
 
-<h3 class="section-title">Sách mới</h3>
-<hr />
-<div class="row">
-    @for (int i = 0; i < 6; i++)
-    {
-        <div class="col-sm-4 col-md-3">
-            <div class="thumbnail">
-                <img src="https://placehold.co/300x400?text=Book+@(i+1)" class="img-responsive" />
-                <div class="capti   on">
-                    <h4>Tựa sách @(i+1)</h4>
-                    <p>Tác giả A</p>
-                    <p>
-                        <a href="#" class="btn btn-success btn-sm"><i class="fa fa-info-circle"></i> Chi tiết</a>
-                        <a href="#" class="btn btn-default btn-sm"><i class="fa fa-plus"></i> Thêm</a>
-                    </p>
+    <!-- Thống kê nhanh -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    <i class="fa fa-book"></i>
+                </div>
+                <h4>Tổng sách</h4>
+                <h2 class="text-primary">2,547</h2>
+                <small class="text-muted">Đầu sách</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
+                    <i class="fa fa-users"></i>
+                </div>
+                <h4>Độc giả</h4>
+                <h2 class="text-success">1,234</h2>
+                <small class="text-muted">Thành viên</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <i class="fa fa-exchange"></i>
+                </div>
+                <h4>Đang mượn</h4>
+                <h2 class="text-warning">156</h2>
+                <small class="text-muted">Phiếu mượn</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                    <i class="fa fa-clock-o"></i>
+                </div>
+                <h4>Quá hạn</h4>
+                <h2 class="text-danger">23</h2>
+                <small class="text-muted">Cần xử lý</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tìm kiếm nhanh -->
+    <div class="library-card">
+        <h3 class="section-title">
+            <i class="fa fa-search"></i> Tìm kiếm nhanh
+        </h3>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="input-group input-group-lg">
+                    <input type="text" class="form-control" placeholder="Nhập tên sách, tác giả hoặc từ khóa..." id="quickSearch">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button">
+                            <i class="fa fa-search"></i> Tìm kiếm
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="btn-group btn-group-lg" role="group" style="width: 100%;">
+                    <button type="button" class="btn btn-default" style="flex: 1;">
+                        <i class="fa fa-barcode"></i> Quét mã
+                    </button>
+                    <button type="button" class="btn btn-default" style="flex: 1;">
+                        <i class="fa fa-filter"></i> Bộ lọc
+                    </button>
                 </div>
             </div>
         </div>
-    }
+        
+        <!-- Tags phổ biến -->
+        <div style="margin-top: 15px;">
+            <small class="text-muted">Tìm kiếm phổ biến:</small>
+            <div style="margin-top: 8px;">
+                <span class="label label-default" style="margin-right: 5px; cursor: pointer; border-radius: 12px;">Văn học</span>
+                <span class="label label-default" style="margin-right: 5px; cursor: pointer; border-radius: 12px;">Lập trình</span>
+                <span class="label label-default" style="margin-right: 5px; cursor: pointer; border-radius: 12px;">Kinh tế</span>
+                <span class="label label-default" style="margin-right: 5px; cursor: pointer; border-radius: 12px;">Tiếng Anh</span>
+                <span class="label label-default" style="margin-right: 5px; cursor: pointer; border-radius: 12px;">Khoa học</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sách mới -->
+        <div class="col-md-6">
+            <div class="library-card">
+                <h3 class="section-title">
+                    <i class="fa fa-star text-warning"></i> Sách mới
+                </h3>
+                <div class="row">
+                    @for (int i = 1; i <= 4; i++)
+                    {
+                        <div class="col-sm-6" style="margin-bottom: 15px;">
+                            <div class="media">
+                                <div class="media-left">
+                                    <img src="https://placehold.co/60x80?text=Book+@i" class="media-object" style="border-radius: 4px;">
+                                </div>
+                                <div class="media-body">
+                                    <h5 class="media-heading">Sách mới @i</h5>
+                                    <small class="text-muted">Tác giả @i</small><br>
+                                    <small class="text-success"><i class="fa fa-check-circle"></i> Có sẵn</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="text-center">
+                    <a href="@Url.Action("Index","Sach")" class="btn btn-default">
+                        Xem tất cả <i class="fa fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sách phổ biến -->
+        <div class="col-md-6">
+            <div class="library-card">
+                <h3 class="section-title">
+                    <i class="fa fa-fire text-danger"></i> Sách phổ biến
+                </h3>
+                <div class="list-group">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <div class="list-group-item">
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    <strong>Sách phổ biến @i</strong><br>
+                                    <small class="text-muted">Tác giả @i</small>
+                                </div>
+                                <div class="col-xs-4 text-right">
+                                    <span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">@((6-i)*50) lượt</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="text-center">
+                    <a href="@Url.Action("Index","Sach")" class="btn btn-default">
+                        Xem chi tiết <i class="fa fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Liên kết nhanh -->
+    <div class="library-card">
+        <h3 class="section-title">
+            <i class="fa fa-link text-info"></i> Liên kết nhanh
+        </h3>
+        <div class="row">
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <a href="@Url.Action("PhieuMuon","MuonTra")" class="btn btn-default btn-block" style="padding: 20px 10px; margin-bottom: 10px;">
+                    <i class="fa fa-download fa-2x" style="display: block; margin-bottom: 10px;"></i>
+                    Phiếu mượn
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <a href="@Url.Action("PhieuTra","MuonTra")" class="btn btn-default btn-block" style="padding: 20px 10px; margin-bottom: 10px;">
+                    <i class="fa fa-upload fa-2x" style="display: block; margin-bottom: 10px;"></i>
+                    Phiếu trả
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <a href="@Url.Action("Index","Sach")" class="btn btn-default btn-block" style="padding: 20px 10px; margin-bottom: 10px;">
+                    <i class="fa fa-search fa-2x" style="display: block; margin-bottom: 10px;"></i>
+                    Tìm sách
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <a href="@Url.Action("Index","DanhMuc")" class="btn btn-default btn-block" style="padding: 20px 10px; margin-bottom: 10px;">
+                    <i class="fa fa-folder fa-2x" style="display: block; margin-bottom: 10px;"></i>
+                    Danh mục
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <a href="@Url.Action("Index","NhanVien")" class="btn btn-default btn-block" style="padding: 20px 10px; margin-bottom: 10px;">
+                    <i class="fa fa-users fa-2x" style="display: block; margin-bottom: 10px;"></i>
+                    Nhân viên
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <a href="@Url.Action("Index","Kho")" class="btn btn-default btn-block" style="padding: 20px 10px; margin-bottom: 10px;">
+                    <i class="fa fa-warehouse fa-2x" style="display: block; margin-bottom: 10px;"></i>
+                    Quản lý kho
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <a href="@Url.Action("Index","KeSach")" class="btn btn-default btn-block" style="padding: 20px 10px; margin-bottom: 10px;">
+                    <i class="fa fa-th fa-2x" style="display: block; margin-bottom: 10px;"></i>
+                    Kệ sách
+                </a>
+            </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                <a href="#" class="btn btn-default btn-block" style="padding: 20px 10px; margin-bottom: 10px;">
+                    <i class="fa fa-chart-bar fa-2x" style="display: block; margin-bottom: 10px;"></i>
+                    Báo cáo
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    $(document).ready(function() {
+        // Tìm kiếm nhanh
+        $('#quickSearch').on('keypress', function(e) {
+            if (e.which === 13) {
+                var searchTerm = $(this).val();
+                if (searchTerm.trim()) {
+                    window.location.href = '@Url.Action("Search", "Sach")?q=' + encodeURIComponent(searchTerm);
+                }
+            }
+        });
+        
+        // Click vào tag tìm kiếm
+        $('.label').on('click', function() {
+            var tag = $(this).text();
+            $('#quickSearch').val(tag);
+            window.location.href = '@Url.Action("Search", "Sach")?q=' + encodeURIComponent(tag);
+        });
+        
+        // Hiệu ứng hover cho các card thống kê
+        $('.library-card').hover(
+            function() {
+                $(this).css('transform', 'translateY(-2px)');
+            },
+            function() {
+                $(this).css('transform', 'translateY(0)');
+            }
+        );
+    });
+</script>

@@ -1,3 +1,454 @@
-﻿@{ ViewBag.Title = "Nhân sự"; }
-<h2 class="page-header">@ViewBag.Title</h2>
-<p>Trang nhân sự (UI placeholder).</p>
+﻿@model List<DoAnThuVienNhom12.Controllers.NhanVienModel>
+@{ ViewBag.Title = "Quản lý nhân sự"; }
+
+<div class="animate-fade-in">
+    <div class="page-header">
+        <h2><i class="fa fa-users"></i> @ViewBag.Title</h2>
+        <p class="lead">Quản lý thông tin nhân viên thư viện</p>
+    </div>
+
+    <!-- Thanh tìm kiếm và thao tác -->
+    <div class="library-card">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Tìm kiếm nhân viên..." id="searchStaff">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button" id="searchBtn">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-6 text-right">
+                <button class="btn btn-success" data-toggle="modal" data-target="#addStaffModal">
+                    <i class="fa fa-plus"></i> Thêm nhân viên
+                </button>
+                <button class="btn btn-default">
+                    <i class="fa fa-print"></i> Xuất báo cáo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê nhanh -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
+                    <i class="fa fa-users"></i>
+                </div>
+                <h4>Tổng nhân viên</h4>
+                <h2 class="text-success" id="totalStaff">@(Model?.Count ?? 0)</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    <i class="fa fa-clock-o"></i>
+                </div>
+                <h4>Đang làm việc</h4>
+                <h2 class="text-primary" id="workingStaff">@(Model?.Count(x => x.TrangThai == "Đang làm việc") ?? 0)</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <i class="fa fa-calendar"></i>
+                </div>
+                <h4>Nghỉ phép</h4>
+                <h2 class="text-warning" id="onLeaveStaff">@(Model?.Count(x => x.TrangThai == "Nghỉ phép") ?? 0)</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                    <i class="fa fa-graduation-cap"></i>
+                </div>
+                <h4>Thủ thư</h4>
+                <h2 class="text-purple" id="librarianStaff">@(Model?.Count(x => x.ChucVu.Contains("Thủ thư")) ?? 0)</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách nhân viên -->
+    <div class="library-card">
+        <h3 class="section-title">Danh sách nhân viên</h3>
+        
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" style="display: none; text-align: center; padding: 20px;">
+            <i class="fa fa-spinner fa-spin fa-2x"></i>
+            <p>Đang tìm kiếm...</p>
+        </div>
+
+        <!-- Staff list container -->
+        <div id="staffListContainer">
+            @Html.Partial("_StaffList", Model)
+        </div>
+
+        <!-- Phân trang -->
+        <div class="text-center">
+            <nav aria-label="Phân trang nhân viên">
+                <ul class="pagination">
+                    <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+                    <li class="active"><a href="#">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a>
+                    <li><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm nhân viên -->
+<div class="modal fade" id="addStaffModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" style="color: white;">&times;</span>
+                </button>
+                <h4 class="modal-title"><i class="fa fa-plus"></i> Thêm nhân viên thư viện</h4>
+            </div>
+            <div class="modal-body">
+                <form id="addStaffForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Mã nhân viên <span class="text-danger">*</span></label>
+                                <input type="text" name="MaNV" class="form-control" placeholder="NV007" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" name="HoTen" class="form-control" placeholder="Nguyễn Văn A" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Chức vụ <span class="text-danger">*</span></label>
+                                <select name="ChucVu" class="form-control" required>
+                                    <option value="">-- Chọn chức vụ --</option>
+                                    <option value="Thủ thư trưởng">Thủ thư trưởng</option>
+                                    <option value="Thủ thư">Thủ thư</option>
+                                    <option value="Nhân viên IT">Nhân viên IT</option>
+                                    <option value="Nhân viên hành chính">Nhân viên hành chính</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Phòng ban <span class="text-danger">*</span></label>
+                                <select name="PhongBan" class="form-control" required>
+                                    <option value="">-- Chọn phòng ban --</option>
+                                    <option value="Phòng Quản lý">Phòng Quản lý</option>
+                                    <option value="Phòng Mượn trả">Phòng Mượn trả</option>
+                                    <option value="Phòng Tài liệu">Phòng Tài liệu</option>
+                                    <option value="Phòng Kỹ thuật">Phòng Kỹ thuật</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="text" name="SoDienThoai" class="form-control" placeholder="0123456789" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Email <span class="text-danger">*</span></label>
+                                <input type="email" name="Email" class="form-control" placeholder="email[at]library.com" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Trạng thái <span class="text-danger">*</span></label>
+                                <select name="TrangThai" class="form-control" required>
+                                    <option value="">-- Chọn trạng thái --</option>
+                                    <option value="Đang làm việc">Đang làm việc</option>
+                                    <option value="Nghỉ phép">Nghỉ phép</option>
+                                    <option value="Tạm nghỉ">Tạm nghỉ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Địa chỉ</label>
+                                <textarea name="DiaChi" class="form-control" rows="3" placeholder="Địa chỉ nhân viên"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="btnAddStaff">
+                    <i class="fa fa-plus"></i> Thêm nhân viên
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal sửa nhân viên -->
+<div class="modal fade" id="editStaffModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f39c12, #e67e22); color: white;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" style="color: white;">&times;</span>
+                </button>
+                <h4 class="modal-title"><i class="fa fa-edit"></i> Sửa thông tin nhân viên</h4>
+            </div>
+            <div class="modal-body">
+                <form id="editStaffForm">
+                    <input type="hidden" name="MaNV" id="editMaNV">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Mã nhân viên</label>
+                                <input type="text" class="form-control" id="editMaNVDisplay" readonly style="background-color: #f5f5f5;">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" name="HoTen" id="editHoTen" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Chức vụ <span class="text-danger">*</span></label>
+                                <select name="ChucVu" id="editChucVu" class="form-control" required>
+                                    <option value="">-- Chọn chức vụ --</option>
+                                    <option value="Thủ thư trưởng">Thủ thư trưởng</option>
+                                    <option value="Thủ thư">Thủ thư</option>
+                                    <option value="Nhân viên IT">Nhân viên IT</option>
+                                    <option value="Nhân viên hành chính">Nhân viên hành chính</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Phòng ban <span class="text-danger">*</span></label>
+                                <select name="PhongBan" id="editPhongBan" class="form-control" required>
+                                    <option value="">-- Chọn phòng ban --</option>
+                                    <option value="Phòng Quản lý">Phòng Quản lý</option>
+                                    <option value="Phòng Mượn trả">Phòng Mượn trả</option>
+                                    <option value="Phòng Tài liệu">Phòng Tài liệu</option>
+                                    <option value="Phòng Kỹ thuật">Phòng Kỹ thuật</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="text" name="SoDienThoai" id="editSoDienThoai" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Email <span class="text-danger">*</span></label>
+                                <input type="email" name="Email" id="editEmail" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Trạng thái <span class="text-danger">*</span></label>
+                                <select name="TrangThai" id="editTrangThai" class="form-control" required>
+                                    <option value="">-- Chọn trạng thái --</option>
+                                    <option value="Đang làm việc">Đang làm việc</option>
+                                    <option value="Nghỉ phép">Nghỉ phép</option>
+                                    <option value="Tạm nghỉ">Tạm nghỉ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Địa chỉ</label>
+                                <textarea name="DiaChi" id="editDiaChi" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning" id="btnEditStaff">
+                    <i class="fa fa-save"></i> Cập nhật
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xem chi tiết nhân viên -->
+<div class="modal fade" id="viewStaffModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" style="color: white;">&times;</span>
+                </button>
+                <h4 class="modal-title"><i class="fa fa-user"></i> Thông tin nhân viên</h4>
+            </div>
+            <div class="modal-body" id="viewStaffContent">
+                <!-- Nội dung sẽ được load bằng JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function isValidPhone(phone) {
+            return phone && phone.length >= 10 && phone.length <= 11 && !isNaN(phone);
+        }
+        
+        function isValidEmail(email) {
+            return email && email.indexOf('.') > 0 && email.length > 5;
+        }
+        
+        function showMessage(type, message) {
+            var alertClass = 'alert-info';
+            if (type === 'success') alertClass = 'alert-success';
+            if (type === 'error') alertClass = 'alert-danger';
+            if (type === 'warning') alertClass = 'alert-warning';
+            
+            var toast = document.createElement('div');
+            toast.className = 'alert ' + alertClass + ' alert-dismissible';
+            toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = '<button type="button" class="close" onclick="this.parentNode.remove()">&times;</button>' + message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(function() {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 3000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchInput = document.getElementById('searchStaff');
+            var searchBtn = document.getElementById('searchBtn');
+            var searchTimeout;
+            
+            function performSearch(searchTerm) {
+                document.getElementById('loadingIndicator').style.display = 'block';
+                document.getElementById('staffListContainer').style.display = 'none';
+                
+                setTimeout(function() {
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    document.getElementById('staffListContainer').style.display = 'block';
+                    showMessage('info', 'Tìm kiếm: ' + (searchTerm || 'Tất cả nhân viên'));
+                }, 500);
+            }
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    var searchTerm = this.value;
+                    
+                    searchTimeout = setTimeout(function() {
+                        performSearch(searchTerm);
+                    }, 300);
+                });
+            }
+            
+            if (searchBtn) {
+                searchBtn.addEventListener('click', function() {
+                    var searchTerm = searchInput ? searchInput.value : '';
+                    performSearch(searchTerm);
+                });
+            }
+            
+            var btnAddStaff = document.getElementById('btnAddStaff');
+            if (btnAddStaff) {
+                btnAddStaff.addEventListener('click', function() {
+                    var form = document.getElementById('addStaffForm');
+                    if (!form) return;
+                    
+                    var formData = new FormData(form);
+                    var data = {};
+                    for (var pair of formData.entries()) {
+                        data[pair[0]] = pair[1];
+                    }
+                    
+                    if (!data.HoTen || !data.ChucVu || !data.PhongBan || !data.SoDienThoai || !data.Email || !data.TrangThai) {
+                        showMessage('warning', 'Vui lòng điền đầy đủ thông tin bắt buộc!');
+                        return;
+                    }
+                    
+                    if (!data.MaNV) {
+                        showMessage('warning', 'Vui lòng nhập mã nhân viên!');
+                        return;
+                    }
+                    
+                    if (!isValidPhone(data.SoDienThoai)) {
+                        showMessage('warning', 'Số điện thoại không hợp lệ!');
+                        return;
+                    }
+                    
+                    if (!isValidEmail(data.Email)) {
+                        showMessage('warning', 'Email không hợp lệ!');
+                        return;
+                    }
+                    
+                    showMessage('success', 'Thêm nhân viên thành công!');
+                    form.reset();
+                    
+                    var modal = document.getElementById('addStaffModal');
+                    if (modal && window.jQuery) {
+                        window.jQuery(modal).modal('hide');
+                    }
+                });
+            }
+            
+            if (window.jQuery) {
+                window.jQuery('#addStaffModal').on('hidden.bs.modal', function () {
+                    document.getElementById('addStaffForm').reset();
+                });
+                
+                window.jQuery('#editStaffModal').on('hidden.bs.modal', function () {
+                    document.getElementById('editStaffForm').reset();
+                });
+            }
+        });
+    </script>
+}
+
+<style>
+    .text-purple {
+        color: #9b59b6 !important;
+    }
+    
+    .staff-avatar {
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
+    }
+</style>

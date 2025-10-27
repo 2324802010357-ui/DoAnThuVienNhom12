@@ -1,78 +1,407 @@
-﻿<script>
-    (function () {
-        /* ... (giữ nguyên tất cả phần trên: Toggle, SUGGEST, attachSuggestRadio, slider, v.v.) ... */
+﻿@model List<DoAnThuVienNhom12.Controllers.SachModel>
+@{ ViewBag.Title = "Tìm kiếm sách"; }
 
-        // ⬇️ CHỈNH: danh sách field tạo pill = CHỈ các ô nâng cao
-        var PILL_FIELDS = [
-            { sel: '#advAuthor', label: 'Tác giả' },
-            { sel: '#advGenre', label: 'Thể loại' },
-            { sel: '#advCategory', label: 'Danh mục' },
-            { sel: '#advPublisher', label: 'NXB' },
-            { sel: '#yearFrom', label: 'Từ năm' },
-            { sel: '#yearTo', label: 'Đến năm' }
-        ];
+<div class="animate-fade-in">
+    <div class="page-header">
+        <h2><i class="fa fa-search"></i> @ViewBag.Title</h2>
+        <p class="lead">Tìm kiếm và khám phá kho tàng tri thức</p>
+    </div>
 
-        function escapeHtml(str) { return (str || '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s])); }
+    <!-- Form tìm kiếm nâng cao -->
+    <div class="library-card">
+        <h3 class="section-title">
+            <i class="fa fa-filter"></i> Tìm kiếm nâng cao
+            <button class="btn btn-xs btn-default pull-right" id="toggleAdvanced">
+                <i class="fa fa-chevron-down"></i> Thu gọn
+            </button>
+        </h3>
 
-        // 👉 chỉ xoá các field nâng cao
-        function clearAllAdvanced() {
-            PILL_FIELDS.forEach(function (f) { var $el = $(f.sel); if ($el.length) $el.val(''); });
-            if ($('#yearSlider').length) {
-                var SL_MIN = 1900, SL_MAX = new Date().getFullYear();
-                $('#yearSlider').slider('values', [SL_MIN, SL_MAX]);
-            }
-            renderFilterPills();
-            if (typeof buildSummary === 'function') buildSummary();
-        }
+        <form id="advancedSearchForm">
+            <!-- Tìm kiếm cơ bản -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>Từ khóa</label>
+                        <div class="input-group input-group-lg">
+                            <input type="text" name="TuKhoa" class="form-control" placeholder="Nhập tên sách, tác giả hoặc từ khóa..." id="mainSearch">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fa fa-search"></i> Tìm kiếm
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        // 👉 render pill từ CÁC Ô NÂNG CAO
-        function renderFilterPills() {
-            var $bar = $('#filterBar').empty();
-            var count = 0;
+            <!-- Tìm kiếm nâng cao -->
+            <div id="advancedFields">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Tác giả</label>
+                            <input type="text" name="TacGia" class="form-control" placeholder="Tên tác giả">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Thể loại</label>
+                            <select name="TheLoai" class="form-control">
+                                <option value="">-- Tất cả thể loại --</option>
+                                <option value="Tin học">Tin học</option>
+                                <option value="Văn học">Văn học</option>
+                                <option value="Kinh tế">Kinh tế</option>
+                                <option value="Ngoại ngữ">Ngoại ngữ</option>
+                                <option value="Lịch sử">Lịch sử</option>
+                                <option value="Khoa học">Khoa học</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Danh mục</label>
+                            <select name="DanhMuc" class="form-control">
+                                <option value="">-- Tất cả danh mục --</option>
+                                <option value="Công nghệ">Công nghệ</option>
+                                <option value="Văn học">Văn học</option>
+                                <option value="Kinh tế">Kinh tế</option>
+                                <option value="Ngôn ngữ">Ngôn ngữ</option>
+                                <option value="Lịch sử">Lịch sử</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
-            PILL_FIELDS.forEach(function (f) {
-                var $el = $(f.sel); if (!$el.length) return;
-                var v = ($el.val() || '').trim();
-                if (!v) return;
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Nhà xuất bản</label>
+                            <select name="NhaXuatBan" class="form-control">
+                                <option value="">-- Tất cả NXB --</option>
+                                <option value="NXB Giáo dục">NXB Giáo dục</option>
+                                <option value="NXB Văn học">NXB Văn học</option>
+                                <option value="NXB Kinh tế">NXB Kinh tế</option>
+                                <option value="NXB Đại học Quốc gia">NXB Đại học Quốc gia</option>
+                                <option value="NXB Chính trị Quốc gia">NXB Chính trị Quốc gia</option>
+                                <option value="NXB Khoa học">NXB Khoa học</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Năm xuất bản từ</label>
+                            <input type="number" name="NamTu" class="form-control" placeholder="2020" min="1900" max="2030">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Đến năm</label>
+                            <input type="number" name="NamDen" class="form-control" placeholder="2024" min="1900" max="2030">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Tình trạng</label>
+                            <select name="TinhTrang" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="Có sẵn">Có sẵn</option>
+                                <option value="Đang mượn">Đang mượn</option>
+                                <option value="Hết sách">Hết sách</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
-                count++;
-                $bar.append(
-                    '<span class="filter-pill" data-sel="' + f.sel + '">'
-                    + '<strong>' + f.label + ':</strong> '
-                    + '<span>' + escapeHtml(v) + '</span> '
-                    + '<button type="button" class="x pill-x" aria-label="Xoá">×</button>'
-                    + '</span>'
-                );
+                <div class="row">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-search"></i> Tìm kiếm nâng cao
+                        </button>
+                        <button type="button" class="btn btn-default" id="clearFilters">
+                            <i class="fa fa-eraser"></i> Xóa bộ lọc
+                        </button>
+                        <button type="button" class="btn btn-info" id="saveSearch">
+                            <i class="fa fa-save"></i> Lưu tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Tags tìm kiếm phổ biến -->
+        <div style="margin-top: 15px;" id="popularTags">
+            <small class="text-muted">Tìm kiếm phổ biến:</small>
+            <div style="margin-top: 8px;">
+                <span class="search-tag" data-search="Lập trình">Lập trình</span>
+                <span class="search-tag" data-search="Văn học Việt Nam">Văn học Việt Nam</span>
+                <span class="search-tag" data-search="Tiếng Anh">Tiếng Anh</span>
+                <span class="search-tag" data-search="Kinh tế học">Kinh tế học</span>
+                <span class="search-tag" data-search="Lịch sử">Lịch sử</span>
+                <span class="search-tag" data-search="Khoa học máy tính">Khoa học máy tính</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê tìm kiếm -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    <i class="fa fa-book"></i>
+                </div>
+                <h4>Tổng sách</h4>
+                <h2 class="text-primary" id="totalBooks">@(Model?.Count ?? 0)</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
+                    <i class="fa fa-check-circle"></i>
+                </div>
+                <h4>Có sẵn</h4>
+                <h2 class="text-success" id="availableBooks">@(Model?.Count(x => x.TinhTrang == "Có sẵn") ?? 0)</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <i class="fa fa-clock-o"></i>
+                </div>
+                <h4>Đang mượn</h4>
+                <h2 class="text-warning" id="borrowedBooks">@(Model?.Count(x => x.TinhTrang == "Đang mượn") ?? 0)</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                    <i class="fa fa-tags"></i>
+                </div>
+                <h4>Thể loại</h4>
+                <h2 class="text-purple" id="categoryCount">@(Model?.Select(x => x.TheLoai).Distinct().Count() ?? 0)</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kết quả tìm kiếm -->
+    <div class="library-card">
+        <h3 class="section-title">
+            <i class="fa fa-list"></i> Kết quả tìm kiếm
+            <span class="badge" id="resultCount">@(Model?.Count ?? 0) kết quả</span>
+        </h3>
+        
+        <!-- Sắp xếp và lọc -->
+        <div class="row" style="margin-bottom: 15px;">
+            <div class="col-md-6">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default active" data-view="grid">
+                        <i class="fa fa-th"></i> Lưới
+                    </button>
+                    <button type="button" class="btn btn-default" data-view="list">
+                        <i class="fa fa-list"></i> Danh sách
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6 text-right">
+                <div class="form-inline">
+                    <label>Sắp xếp:</label>
+                    <select class="form-control input-sm" id="sortBy">
+                        <option value="name">Tên sách</option>
+                        <option value="author">Tác giả</option>
+                        <option value="year">Năm xuất bản</option>
+                        <option value="category">Thể loại</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" style="display: none; text-align: center; padding: 20px;">
+            <i class="fa fa-spinner fa-spin fa-2x"></i>
+            <p>Đang tìm kiếm...</p>
+        </div>
+
+        <!-- Book list container -->
+        <div id="bookListContainer">
+            @Html.Partial("_BookList", Model)
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var searchTimeout;
+
+            // Toggle advanced search
+            $('#toggleAdvanced').click(function() {
+                $('#advancedFields').slideToggle();
+                var icon = $(this).find('i');
+                if (icon.hasClass('fa-chevron-down')) {
+                    icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+                    $(this).html('<i class="fa fa-chevron-up"></i> Mở rộng');
+                } else {
+                    icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                    $(this).html('<i class="fa fa-chevron-down"></i> Thu gọn');
+                }
             });
 
-            if (count > 0) {
-                $bar.append('<button type="button" id="btnClearAllFilters" class="filter-clear">Xoá tất cả</button>');
+            // Advanced search form submit
+            $('#advancedSearchForm').submit(function(e) {
+                e.preventDefault();
+                performSearch();
+            });
+
+            // Real-time search on main input
+            $('#mainSearch').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    performSearch();
+                }, 500);
+            });
+
+            // Clear filters
+            $('#clearFilters').click(function() {
+                $('#advancedSearchForm')[0].reset();
+                performSearch();
+            });
+
+            // Popular tags
+            $('.search-tag').click(function() {
+                var searchTerm = $(this).data('search');
+                $('#mainSearch').val(searchTerm);
+                performSearch();
+            });
+
+            // View toggle
+            $('[data-view]').click(function() {
+                $('[data-view]').removeClass('active');
+                $(this).addClass('active');
+                var view = $(this).data('view');
+                toggleView(view);
+            });
+
+            // Sort change
+            $('#sortBy').change(function() {
+                performSearch();
+            });
+
+            function performSearch() {
+                $('#loadingIndicator').show();
+                $('#bookListContainer').hide();
+
+                var formData = $('#advancedSearchForm').serialize();
+
+                $.ajax({
+                    url: '@Url.Action("TimKiemSach", "Sach")',
+                    type: 'POST',
+                    data: formData,
+                    success: function(data) {
+                        $('#bookListContainer').html(data);
+                        $('#loadingIndicator').hide();
+                        $('#bookListContainer').show();
+                        updateResultCount();
+                    },
+                    error: function() {
+                        $('#loadingIndicator').hide();
+                        $('#bookListContainer').show();
+                        showToast('error', 'Có lỗi xảy ra khi tìm kiếm!');
+                    }
+                });
             }
-        }
 
-        // ✕: chỉ xoá field nâng cao tương ứng (không đụng ô ở trên)
-        $(document).off('click', '.pill-x').on('click', '.pill-x', function (e) {
-            e.preventDefault(); e.stopPropagation();
-            var sel = $(this).closest('.filter-pill').data('sel');
-            if (sel) { $(sel).val(''); }
-            renderFilterPills();
-            if (typeof buildSummary === 'function') buildSummary();
+            function toggleView(view) {
+                if (view === 'grid') {
+                    $('#bookListContainer .book-item').removeClass('list-view').addClass('grid-view');
+                } else {
+                    $('#bookListContainer .book-item').removeClass('grid-view').addClass('list-view');
+                }
+            }
+
+            function updateResultCount() {
+                var count = $('#bookListContainer .book-item').length;
+                $('#resultCount').text(count + ' kết quả');
+            }
+
+            function showToast(type, message) {
+                var alertClass = type === 'success' ? 'alert-success' : 
+                                type === 'error' ? 'alert-danger' : 'alert-warning';
+                
+                var toast = $('<div class="alert ' + alertClass + ' alert-dismissible" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">' +
+                    '<button type="button" class="close" data-dismiss="alert">&times;</button>' +
+                    message +
+                    '</div>');
+                
+                $('body').append(toast);
+                
+                setTimeout(function() {
+                    toast.fadeOut(function() {
+                        $(this).remove();
+                    });
+                }, 3000);
+            }
+
+            // Auto-complete cho các trường
+            setupAutoComplete();
+
+            function setupAutoComplete() {
+                // Tác giả
+                $('input[name="TacGia"]').on('input', function() {
+                    // Có thể thêm AJAX để lấy danh sách tác giả
+                });
+
+                // Thiết lập các auto-complete khác
+            }
+
+            // Save search functionality
+            $('#saveSearch').click(function() {
+                var formData = $('#advancedSearchForm').serialize();
+                localStorage.setItem('savedSearch', formData);
+                showToast('success', 'Đã lưu tìm kiếm!');
+            });
+
+            // Load saved search if exists
+            var savedSearch = localStorage.getItem('savedSearch');
+            if (savedSearch) {
+                // Có thể thêm nút "Tải tìm kiếm đã lưu"
+            }
         });
+    </script>
+}
 
-        // "Xoá tất cả": chỉ xoá các mục nâng cao phía dưới
-        $(document).off('click', '#btnClearAllFilters').on('click', '#btnClearAllFilters', function (e) {
-            e.preventDefault(); e.stopPropagation();
-            clearAllAdvanced();
-        });
+<style>
+    .search-tag {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4px 12px;
+        margin-right: 8px;
+        margin-bottom: 5px;
+        border-radius: 15px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
 
-        /* --- phần còn lại giữ nguyên: saved/recent, buildSummary, buildDemoResults, init, reset... --- */
+    .search-tag:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
-        // Init
-        renderFilterPills(); buildSummary(); buildDemoResults();
-        // Khi gõ ở ô nâng cao thì cập nhật pill ngay (không ảnh hưởng ô ở trên)
-        $('#advAuthor,#advGenre,#advCategory,#advPublisher,#yearFrom,#yearTo').on('input change', function () {
-            renderFilterPills(); buildSummary();
-        });
+    .text-purple {
+        color: #9b59b6 !important;
+    }
 
-    })();
-</script>
+    #advancedFields {
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+        margin-top: 15px;
+    }
+
+    .book-item.grid-view {
+        /* Grid view styles */
+    }
+
+    .book-item.list-view {
+        /* List view styles */
+    }
+</style>

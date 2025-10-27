@@ -1,0 +1,115 @@
+@model List<DoAnThuVienNhom12.Controllers.NhanVienModel>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Avatar</th>
+                <th>M? NV</th>
+                <th>H? v? t?n</th>
+                <th>Ch?c v?</th>
+                <th>Ph?ng ban</th>
+                <th>Li?n h?</th>
+                <th>Tr?ng th?i</th>
+                <th>Thao t?c</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var nhanVien in Model)
+                {
+                    <tr data-employee-id="@nhanVien.MaNV">
+                        <td>
+                            <div class="staff-avatar" style="background: @nhanVien.GetAvatarColor(); width: 40px; height: 40px; font-size: 14px;">
+                                @nhanVien.GetInitials()
+                            </div>
+                        </td>
+                        <td><strong>@nhanVien.MaNV</strong></td>
+                        <td>
+                            <div>
+                                <strong>@nhanVien.HoTen</strong>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="label label-primary">@nhanVien.ChucVu</span>
+                        </td>
+                        <td>@nhanVien.PhongBan</td>
+                        <td>
+                            <div>
+                                <i class="fa fa-phone"></i> @nhanVien.SoDienThoai<br>
+                                <i class="fa fa-envelope"></i> @nhanVien.Email
+                            </div>
+                        </td>
+                        <td>
+                            @if (nhanVien.TrangThai == "?ang l?m vi?c")
+                            {
+                                <span class="label label-success">@nhanVien.TrangThai</span>
+                            }
+                            else if (nhanVien.TrangThai == "Ngh? ph?p")
+                            {
+                                <span class="label label-warning">@nhanVien.TrangThai</span>
+                            }
+                            else
+                            {
+                                <span class="label label-danger">@nhanVien.TrangThai</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-xs btn-default btn-view-employee" 
+                                        title="Xem chi ti?t" 
+                                        data-employee-id="@nhanVien.MaNV">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                                <button class="btn btn-xs btn-primary btn-edit-employee" 
+                                        title="S?a th?ng tin" 
+                                        data-employee-id="@nhanVien.MaNV">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                                <button class="btn btn-xs btn-danger btn-delete-employee" 
+                                        title="X?a nh?n vi?n" 
+                                        data-employee-id="@nhanVien.MaNV"
+                                        data-employee-name="@nhanVien.HoTen">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center">
+                        <div class="alert alert-info" style="margin: 20px;">
+                            <i class="fa fa-search"></i> Kh?ng t?m th?y nh?n vi?n n?o ph? h?p v?i t? kh?a t?m ki?m
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .staff-avatar {
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin: 0 auto;
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .label {
+        border-radius: 10px;
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+</style>

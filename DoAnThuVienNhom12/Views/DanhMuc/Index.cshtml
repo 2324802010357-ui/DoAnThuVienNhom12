@@ -1,3 +1,422 @@
-﻿@{ ViewBag.Title = "Danh mục"; }
-<h2 class="page-header">@ViewBag.Title</h2>
-<p>Trang danh mục (UI placeholder).</p>
+﻿@model List<DoAnThuVienNhom12.Controllers.DanhMucSachModel>
+@{ ViewBag.Title = "Quản lý danh mục"; }
+
+<div class="animate-fade-in">
+    <div class="page-header">
+        <h2><i class="fa fa-folder-open"></i> @ViewBag.Title</h2>
+        <p class="lead">Quản lý thể loại và danh mục sách trong thư viện</p>
+    </div>
+
+    <!-- Thanh tìm kiếm và thao tác -->
+    <div class="library-card">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Tìm kiếm danh mục..." id="searchCategory">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button" id="btnSearchCategory">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" id="filterTrangThai">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Hoạt động">Hoạt động</option>
+                    <option value="Tạm ngưng">Tạm ngưng</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-right">
+                <button class="btn btn-success" data-toggle="modal" data-target="#addCategoryModal">
+                    <i class="fa fa-plus"></i> Thêm danh mục
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê danh mục -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    <i class="fa fa-folder"></i>
+                </div>
+                <h4>Tổng danh mục</h4>
+                <h2 class="text-primary" id="totalCategories">@(Model?.Count ?? 0)</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
+                    <i class="fa fa-check-circle"></i>
+                </div>
+                <h4>Hoạt động</h4>
+                <h2 class="text-success" id="activeCategories">@(Model?.Count(x => x.TrangThai == "Hoạt động") ?? 0)</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <i class="fa fa-pause-circle"></i>
+                </div>
+                <h4>Tạm ngưng</h4>
+                <h2 class="text-warning" id="inactiveCategories">@(Model?.Count(x => x.TrangThai == "Tạm ngưng") ?? 0)</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="library-card text-center">
+                <div class="staff-avatar" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                    <i class="fa fa-star"></i>
+                </div>
+                <h4>Tổng sách</h4>
+                <h2 class="text-purple" id="totalBooks">@(Model?.Sum(x => x.SoLuongSach) ?? 0)</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách danh mục -->
+    <div class="library-card">
+        <h3 class="section-title">Danh sách danh mục</h3>
+        
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" style="display: none; text-align: center; padding: 20px;">
+            <i class="fa fa-spinner fa-spin fa-2x"></i>
+            <p>Đang tìm kiếm...</p>
+        </div>
+
+        <!-- Category list container -->
+        <div id="categoryListContainer">
+            @Html.Partial("_DanhMucList", Model)
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm danh mục -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" style="color: white;">&times;</span>
+                </button>
+                <h4 class="modal-title"><i class="fa fa-plus"></i> Thêm danh mục sách</h4>
+            </div>
+            <div class="modal-body">
+                <form id="addCategoryForm">
+                    <div class="form-group">
+                        <label>Mã danh mục <span class="text-danger">*</span></label>
+                        <input type="text" name="MaDanhMuc" class="form-control" placeholder="DM006" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên danh mục <span class="text-danger">*</span></label>
+                        <input type="text" name="TenDanhMuc" class="form-control" placeholder="Nhập tên danh mục" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea name="MoTa" class="form-control" rows="3" placeholder="Mô tả chi tiết về danh mục"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Trạng thái <span class="text-danger">*</span></label>
+                        <select name="TrangThai" class="form-control" required>
+                            <option value="">-- Chọn trạng thái --</option>
+                            <option value="Hoạt động">Hoạt động</option>
+                            <option value="Tạm ngưng">Tạm ngưng</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="btnAddCategory">
+                    <i class="fa fa-plus"></i> Thêm danh mục
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal sửa danh mục -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f39c12, #e67e22); color: white;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" style="color: white;">&times;</span>
+                </button>
+                <h4 class="modal-title"><i class="fa fa-edit"></i> Sửa thông tin danh mục</h4>
+            </div>
+            <div class="modal-body">
+                <form id="editCategoryForm">
+                    <input type="hidden" name="MaDanhMuc" id="editMaDanhMuc">
+                    <div class="form-group">
+                        <label>Mã danh mục</label>
+                        <input type="text" class="form-control" id="editMaDanhMucDisplay" readonly style="background-color: #f5f5f5;">
+                    </div>
+                    <div class="form-group">
+                        <label>Tên danh mục <span class="text-danger">*</span></label>
+                        <input type="text" name="TenDanhMuc" id="editTenDanhMuc" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea name="MoTa" id="editMoTa" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Trạng thái <span class="text-danger">*</span></label>
+                        <select name="TrangThai" id="editTrangThai" class="form-control" required>
+                            <option value="">-- Chọn trạng thái --</option>
+                            <option value="Hoạt động">Hoạt động</option>
+                            <option value="Tạm ngưng">Tạm ngưng</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning" id="btnEditCategory">
+                    <i class="fa fa-save"></i> Cập nhật
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var searchTimeout;
+            
+            // ==================== TÌM KIẾM DANH MỤC ====================
+            $('#searchCategory').on('input', function() {
+                clearTimeout(searchTimeout);
+                var searchTerm = $(this).val();
+                
+                searchTimeout = setTimeout(function() {
+                    performSearch(searchTerm);
+                }, 300);
+            });
+
+            $('#btnSearchCategory').click(function() {
+                performSearch($('#searchCategory').val());
+            });
+
+            $('#filterTrangThai').change(function() {
+                performSearch($('#searchCategory').val());
+            });
+
+            $('#searchCategory').keypress(function(e) {
+                if (e.which == 13) {
+                    e.preventDefault();
+                    performSearch($(this).val());
+                }
+            });
+
+            function performSearch(searchTerm) {
+                var trangThai = $('#filterTrangThai').val();
+
+                $('#loadingIndicator').show();
+                $('#categoryListContainer').hide();
+
+                $.ajax({
+                    url: '@Url.Action("TimKiemDanhMuc", "DanhMuc")',
+                    type: 'POST',
+                    data: { 
+                        searchTerm: searchTerm,
+                        trangThai: trangThai
+                    },
+                    success: function(data) {
+                        $('#categoryListContainer').html(data);
+                        $('#loadingIndicator').hide();
+                        $('#categoryListContainer').show();
+                        bindCategoryEvents();
+                    },
+                    error: function() {
+                        $('#loadingIndicator').hide();
+                        $('#categoryListContainer').show();
+                        showToast('error', 'Có lỗi xảy ra khi tìm kiếm!');
+                    }
+                });
+            }
+
+            // ==================== THÊM DANH MỤC ====================
+            $('#btnAddCategory').click(function() {
+                var formData = {};
+                $('#addCategoryForm').serializeArray().forEach(function(item) {
+                    formData[item.name] = item.value;
+                });
+
+                if (!validateCategoryForm(formData, false)) {
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("ThemDanhMucSach", "DanhMuc")',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#addCategoryModal').modal('hide');
+                            $('#addCategoryForm')[0].reset();
+                            showToast('success', response.message);
+                            refreshCategoryList();
+                        } else {
+                            showToast('error', response.message);
+                        }
+                    },
+                    error: function() {
+                        showToast('error', 'Có lỗi xảy ra khi thêm danh mục!');
+                    }
+                });
+            });
+
+            // ==================== BIND EVENTS ====================
+            function bindCategoryEvents() {
+                // Sửa danh mục
+                $('.btn-edit-category').off('click').on('click', function() {
+                    var categoryId = $(this).data('category-id');
+                    loadCategoryForEdit(categoryId);
+                });
+
+                // Xóa danh mục
+                $('.btn-delete-category').off('click').on('click', function() {
+                    var categoryId = $(this).data('category-id');
+                    var categoryName = $(this).data('category-name');
+                    deleteCategory(categoryId, categoryName);
+                });
+            }
+
+            // ==================== SỬA DANH MỤC ====================
+            function loadCategoryForEdit(categoryId) {
+                $.ajax({
+                    url: '@Url.Action("GetDanhMuc", "DanhMuc")',
+                    type: 'GET',
+                    data: { maDanhMuc: categoryId },
+                    success: function(response) {
+                        if (response.success) {
+                            var cat = response.data;
+                            $('#editMaDanhMuc').val(cat.MaDanhMuc);
+                            $('#editMaDanhMucDisplay').val(cat.MaDanhMuc);
+                            $('#editTenDanhMuc').val(cat.TenDanhMuc);
+                            $('#editMoTa').val(cat.MoTa);
+                            $('#editTrangThai').val(cat.TrangThai);
+                            $('#editCategoryModal').modal('show');
+                        } else {
+                            showToast('error', response.message);
+                        }
+                    },
+                    error: function() {
+                        showToast('error', 'Có lỗi xảy ra khi tải thông tin danh mục!');
+                    }
+                });
+            }
+
+            $('#btnEditCategory').click(function() {
+                var formData = {};
+                $('#editCategoryForm').serializeArray().forEach(function(item) {
+                    formData[item.name] = item.value;
+                });
+
+                if (!validateCategoryForm(formData, true)) {
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SuaThongTinDanhMucSach", "DanhMuc")',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#editCategoryModal').modal('hide');
+                            showToast('success', response.message);
+                            refreshCategoryList();
+                        } else {
+                            showToast('error', response.message);
+                        }
+                    },
+                    error: function() {
+                        showToast('error', 'Có lỗi xảy ra khi cập nhật danh mục!');
+                    }
+                });
+            });
+
+            // ==================== XÓA DANH MỤC ====================
+            function deleteCategory(categoryId, categoryName) {
+                if (confirm('Bạn có chắc chắn muốn xóa danh mục "' + categoryName + '"?\nHành động này không thể hoàn tác!')) {
+                    $.ajax({
+                        url: '@Url.Action("XoaDanhMucSach", "DanhMuc")',
+                        type: 'POST',
+                        data: { maDanhMuc: categoryId },
+                        success: function(response) {
+                            if (response.success) {
+                                showToast('success', response.message);
+                                refreshCategoryList();
+                            } else {
+                                showToast('error', response.message);
+                            }
+                        },
+                        error: function() {
+                            showToast('error', 'Có lỗi xảy ra khi xóa danh mục!');
+                        }
+                    });
+                }
+            }
+
+            // ==================== HELPER FUNCTIONS ====================
+            function validateCategoryForm(data, isEdit) {
+                if (!data.TenDanhMuc || !data.TrangThai) {
+                    showToast('warning', 'Vui lòng điền đầy đủ thông tin bắt buộc!');
+                    return false;
+                }
+
+                if (!isEdit && !data.MaDanhMuc) {
+                    showToast('warning', 'Vui lòng nhập mã danh mục!');
+                    return false;
+                }
+
+                return true;
+            }
+
+            function refreshCategoryList() {
+                performSearch($('#searchCategory').val());
+            }
+
+            function showToast(type, message) {
+                var alertClass = type === 'success' ? 'alert-success' : 
+                                type === 'error' ? 'alert-danger' : 'alert-warning';
+                
+                var toast = $(`
+                    <div class="alert ${alertClass} alert-dismissible" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        ${message}
+                    </div>
+                `);
+                
+                $('body').append(toast);
+                
+                setTimeout(function() {
+                    toast.fadeOut(function() {
+                        $(this).remove();
+                    });
+                }, 3000);
+            }
+
+            // Bind events for initial load
+            bindCategoryEvents();
+
+            // Reset form khi đóng modal
+            $('#addCategoryModal').on('hidden.bs.modal', function () {
+                $('#addCategoryForm')[0].reset();
+            });
+
+            $('#editCategoryModal').on('hidden.bs.modal', function () {
+                $('#editCategoryForm')[0].reset();
+            });
+        });
+    </script>
+}
+
+<style>
+    .text-purple {
+        color: #9b59b6 !important;
+    }
+</style>

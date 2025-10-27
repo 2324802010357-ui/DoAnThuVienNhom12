@@ -1,132 +1,327 @@
 ﻿@{
-    ViewBag.Title = "Phiếu trả";
+    ViewBag.Title = "Phiếu trả sách";
 }
 
-<div class="panel panel-default" style="margin-top:10px;">
-    <div class="panel-heading"><strong><i class="glyphicon glyphicon-list-alt"></i> Phiếu trả</strong></div>
-    <div class="panel-body">
+<style>
+    .ui-autocomplete {
+        z-index: 3000
+    }
 
-        <div class="form-horizontal">
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Mã phiếu mượn:</label>
-                <div class="col-sm-3"><input id="rtBorrowId" class="form-control" placeholder="VD: PM0001" autocomplete="off" /></div>
-                <div class="col-sm-3"><button id="rtLoadBorrow" type="button" class="btn btn-default"><i class="glyphicon glyphicon-search"></i> Tải dữ liệu</button></div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Độc giả:</label>
-                <div class="col-sm-7"><input id="rtReader" class="form-control" disabled placeholder="Tự điền…" /></div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Ngày trả:</label>
-                <div class="col-sm-3"><input id="rtReturnDate" type="date" class="form-control" /></div>
-            </div>
-        </div>
+    .table > tbody > tr > td {
+        vertical-align: middle
+    }
 
-        <hr />
+    .badge-soft {
+        background: #eef2ff;
+        color: #1f2a56;
+        border: 1px solid #cdd5ff
+    }
 
-        <div class="table-responsive">
-            <table class="table table-bordered" id="tblReturn">
-                <thead>
-                    <tr class="active">
-                        <th style="width:40px"><input type="checkbox" id="rtCheckAll" /></th>
-                        <th style="width:110px">Mã sách</th>
-                        <th>Tên sách</th>
-                        <th style="width:120px">Hạn trả</th>
-                        <th style="width:110px">Ngày trả</th>
-                        <th style="width:90px">Trễ</th>
-                        <th style="width:140px">Tình trạng</th>
-                        <th style="width:110px">Phí (đ)</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    .total-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 15px;
+    }
 
-        <div class="row">
-            <div class="col-sm-6" style="color:#778">
-                <span class="label label-info">Ghi chú</span>
-                <ul style="margin-top:8px">
-                    <li>Phạt trễ = trễ ngày × <strong id="feePerDay">2000</strong> đ.</li>
-                    <li>Hư nhẹ: +5.000đ; Hư nặng/Mất: +50.000đ (demo).</li>
-                </ul>
+    hr.dashed {
+        border-top: 1px dashed #e5e7eb
+    }
+
+    .student-info-section {
+        background: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .late-badge {
+        background: #fee;
+        color: #c00;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+
+    .ok-badge {
+        background: #efe;
+        color: #060;
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="row" style="margin-top:10px;">
+    <div class="col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong><i class="glyphicon glyphicon-share"></i> Phiếu trả sách</strong>
             </div>
-            <div class="col-sm-6">
-                <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px">
-                    Tổng tiền phạt: <strong id="rtTotalFee">0</strong> đ
+            <div class="panel-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Mã phiếu mượn:</label>
+                        <div class="col-sm-4">
+                            <input id="rtBorrowId" class="form-control" placeholder="Nhập mã phiếu mượn..." autocomplete="off">
+                        </div>
+                        <div class="col-sm-3">
+                            <button id="rtLoadBorrow" type="button" class="btn btn-primary">
+                                <i class="glyphicon glyphicon-search"></i> Tải phiếu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="student-info-section" id="studentInfoSection" style="display:none;">
+                    <h5><i class="glyphicon glyphicon-user"></i> Thông tin sinh viên</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Tên sinh viên:</strong><br>
+                            <span id="rtStudentName">-</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>MSSV:</strong><br>
+                            <span id="rtStudentId">-</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Lớp:</strong><br>
+                            <span id="rtClassId">-</span>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:10px;">
+                        <div class="col-md-4">
+                            <strong>Ngày mượn:</strong><br>
+                            <span id="rtBorrowDate">-</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Hạn trả:</strong><br>
+                            <span id="rtDueDate">-</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Ngày trả thực tế:</strong><br>
+                            <input id="rtReturnDate" type="date" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="dashed">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tblReturn">
+                        <thead>
+                            <tr class="active">
+                                <th style="width:50px">STT</th>
+                                <th style="width:110px">Mã sách</th>
+                                <th>Tên sách</th>
+                                <th style="width:140px">Tác giả</th>
+                                <th style="width:90px">Trễ (ngày)</th>
+                                <th style="width:140px">Tình trạng</th>
+                                <th style="width:110px">Phí phạt (đ)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-sm-6" style="color:#555">
+                        <span class="badge badge-soft">Quy định phạt</span>
+                        <ul style="margin-top:8px; font-size:13px;">
+                            <li>Trả trễ: <strong id="feePerDay">2,000</strong> đ/ngày</li>
+                            <li>Sách hư hỏng nhẹ: +<strong>10,000</strong> đ</li>
+                            <li>Sách hư hỏng nặng: +<strong>50,000</strong> đ</li>
+                            <li>Sách mất: +<strong>100,000</strong> đ</li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="total-box">
+                            <h4 style="margin-top:0;">Tổng tiền phạt</h4>
+                            <h2 style="margin:10px 0;"><strong id="rtTotalFee">0</strong> đ</h2>
+                            <div>Số sách trả: <strong id="rtBookCount">0</strong></div>
+                            <div>Số sách trễ: <strong id="rtLateCount">0</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-right" style="margin-top:12px">
+                    <button class="btn btn-default" type="button" id="rtPrint">
+                        <i class="glyphicon glyphicon-print"></i> In phiếu
+                    </button>
+                    <button class="btn btn-success" type="button" id="rtSubmit">
+                        <i class="glyphicon glyphicon-ok"></i> Xác nhận trả sách
+                    </button>
                 </div>
             </div>
-        </div>
-
-        <div class="text-right" style="margin-top:12px">
-            <button class="btn btn-default" type="button" id="rtPrint"><i class="glyphicon glyphicon-print"></i> In phiếu</button>
-            <button class="btn btn-primary" type="button" id="rtSubmit"><i class="glyphicon glyphicon-ok"></i> Xác nhận trả</button>
         </div>
     </div>
 </div>
 
 @section Scripts{
-    <script>
+<script>
 (function(){
-  var FEE_PER_DAY=2000; $('#feePerDay').text(FEE_PER_DAY.toLocaleString());
-  function todayStr(){return new Date().toISOString().slice(0,10);}
-  function addDaysStr(d,days){var x=new Date(d);x.setDate(x.getDate()+days);return x.toISOString().slice(0,10);}
+  var FEE_PER_DAY = 2000;
+  var BORROW_RECEIPTS = [
+    {
+      id: 'PM001',
+      studentName: 'Nguyễn Văn Anh',
+      studentId: '2324802010357',
+      classId: 'DH23TT01',
+      borrowDate: '2024-01-10',
+      dueDate: '2024-01-24',
+      books: [
+        {code:'S001', title:'Lập trình C# nâng cao', author:'Kazami Yuki'},
+        {code:'S002', title:'Cấu trúc dữ liệu & Giải thuật', author:'Nguyễn Đức Nghĩa'},
+        {code:'S003', title:'Toán cao cấp A1', author:'Nguyễn Nhật Ánh'}
+      ]
+    },
+    {
+      id: 'PM002',
+      studentName: 'Trần Thị Bình',
+      studentId: '2324802010358',
+      classId: 'DH23TT02',
+      borrowDate: '2024-01-15',
+      dueDate: '2024-01-29',
+      books: [
+        {code:'S004', title:'Thuật toán ứng dụng', author:'Haruki Murakami'},
+        {code:'S005', title:'Cơ sở dữ liệu', author:'Trần Văn A'}
+      ]
+    }
+  ];
+
+  function todayStr(){
+    return new Date().toISOString().slice(0,10);
+  }
+  
   $('#rtReturnDate').val(todayStr());
 
-  $('#rtCheckAll').on('change', function(){ $('#tblReturn tbody .chk').prop('checked', this.checked).trigger('change'); });
+  $('#rtBorrowId').autocomplete({
+    minLength:0,
+    source: BORROW_RECEIPTS.map(r=>({label:r.id+' - '+r.studentName,value:r.id,data:r})),
+    select: function(e,ui){
+      $(this).val(ui.item.value);
+      loadBorrowReceipt(ui.item.data);
+      return false;
+    }
+  }).on('focus', function(){ $(this).autocomplete('search', this.value); });
 
-  // DEMO: tải từ mã phiếu mượn
   $('#rtLoadBorrow').on('click', function(){
-    var id=$('#rtBorrowId').val().trim(); if(!id){ alert('Nhập mã phiếu mượn'); return; }
-    $('#rtReader').val('DG001 • Nguyễn Văn A'); // giả lập
-    var due = addDaysStr(todayStr(), 7);
-    renderRows([
-      {code:'S001', title:'Lập trình C# nâng cao', due: due},
-      {code:'S003', title:'Toán cao cấp A1',       due: due}
-    ]);
+    var id = $('#rtBorrowId').val().trim();
+    if(!id){ 
+      alert('Vui lòng nhập mã phiếu mượn'); 
+      return; 
+    }
+    var receipt = BORROW_RECEIPTS.find(r => r.id === id);
+    if(receipt){
+      loadBorrowReceipt(receipt);
+    } else {
+      alert('Không tìm thấy phiếu mượn: ' + id);
+    }
   });
 
-  function renderRows(rows){
-    var tb=$('#tblReturn tbody').empty();
-    rows.forEach(function(r){
-      var tr=$('<tr/>');
-      tr.append('<td class="text-center"><input type="checkbox" class="chk"></td>');
-      tr.append('<td>'+r.code+'</td>');
-      tr.append('<td>'+r.title+'</td>');
-      tr.append('<td class="td-due">'+r.due+'</td>');
-      tr.append('<td><input type="date" class="form-control in-return" value="'+($('#rtReturnDate').val()||todayStr())+'"></td>');
-      tr.append('<td class="td-late text-center">0</td>');
-      tr.append('<td><select class="form-control in-cond"><option value="ok">Bình thường</option><option value="light">Hư nhẹ (+5k)</option><option value="heavy">Hư nặng/Mất (+50k)</option></select></td>');
-      tr.append('<td class="td-fee text-right">0</td>');
+  function loadBorrowReceipt(receipt){
+    $('#studentInfoSection').show();
+    $('#rtStudentName').text(receipt.studentName);
+    $('#rtStudentId').text(receipt.studentId);
+    $('#rtClassId').text(receipt.classId);
+    $('#rtBorrowDate').text(receipt.borrowDate);
+    $('#rtDueDate').text(receipt.dueDate);
+    
+    renderBooks(receipt.books, receipt.dueDate);
+  }
+
+  function renderBooks(books, dueDate){
+    var tb = $('#tblReturn tbody').empty();
+    books.forEach(function(book, index){
+      var tr = $('<tr/>');
+      tr.append('<td class="text-center"><strong>'+(index+1)+'</strong></td>');
+      tr.append('<td>'+book.code+'</td>');
+      tr.append('<td>'+book.title+'</td>');
+      tr.append('<td>'+book.author+'</td>');
+      tr.append('<td class="text-center td-late">0</td>');
+      tr.append('<td><select class="form-control in-cond">'+
+        '<option value="ok">Bình thường</option>'+
+        '<option value="light">Hư hỏng nhẹ (+10,000đ)</option>'+
+        '<option value="heavy">Hư hỏng nặng (+50,000đ)</option>'+
+        '<option value="lost">Mất sách (+100,000đ)</option>'+
+        '</select></td>');
+      tr.append('<td class="text-right td-fee">0</td>');
+      tr.data('dueDate', dueDate);
       tb.append(tr);
     });
     recalc();
   }
 
-  function daysBetween(a,b){ return Math.ceil((new Date(a)-new Date(b))/(1000*60*60*24)); }
-  function money(n){ return (n||0).toLocaleString(); }
-
-  function recalc(){
-    var total=0, ret=$('#rtReturnDate').val()||todayStr();
-    $('#tblReturn tbody tr').each(function(){
-      var $tr=$(this), due=$tr.find('.td-due').text();
-      var actual=$tr.find('.in-return').val()||ret;
-      var late=Math.max(0, daysBetween(actual,due));
-      $tr.find('.td-late').text(late);
-
-      var fee=late*FEE_PER_DAY, cond=$tr.find('.in-cond').val();
-      if(cond==='light') fee+=5000;
-      if(cond==='heavy') fee+=50000;
-      if($tr.find('.chk').prop('checked')) total+=fee;
-      $tr.find('.td-fee').text(money(fee));
-    });
-    $('#rtTotalFee').text(money(total));
+  function daysBetween(a, b){
+    return Math.ceil((new Date(a) - new Date(b)) / (1000*60*60*24));
   }
 
-  $('#tblReturn').on('change','.chk,.in-return,.in-cond',recalc);
-  $('#rtReturnDate').on('change', function(){ $('#tblReturn tbody .in-return').val(this.value); recalc(); });
+  function money(n){
+    return (n||0).toLocaleString('vi-VN');
+  }
 
-  $('#rtPrint').on('click',()=>window.print());
-  $('#rtSubmit').on('click',()=>alert('Xác nhận trả & thu: '+$('#rtTotalFee').text()+'đ (demo)'));
+  function recalc(){
+    var total = 0;
+    var lateCount = 0;
+    var returnDate = $('#rtReturnDate').val() || todayStr();
+    
+    $('#tblReturn tbody tr').each(function(){
+      var $tr = $(this);
+      var dueDate = $tr.data('dueDate');
+      var late = Math.max(0, daysBetween(returnDate, dueDate));
+      
+      $tr.find('.td-late').text(late);
+      if(late > 0) {
+        $tr.find('.td-late').html('<span class="late-badge">'+late+'</span>');
+        lateCount++;
+      } else {
+        $tr.find('.td-late').html('<span class="ok-badge">Đúng hạn</span>');
+      }
+      
+      var fee = late * FEE_PER_DAY;
+      var cond = $tr.find('.in-cond').val();
+      
+      if(cond === 'light') fee += 10000;
+      if(cond === 'heavy') fee += 50000;
+      if(cond === 'lost') fee += 100000;
+      
+      total += fee;
+      $tr.find('.td-fee').text(money(fee));
+    });
+    
+    $('#rtTotalFee').text(money(total));
+    $('#rtBookCount').text($('#tblReturn tbody tr').length);
+    $('#rtLateCount').text(lateCount);
+  }
+
+  $('#tblReturn').on('change', '.in-cond', recalc);
+  $('#rtReturnDate').on('change', recalc);
+
+  $('#rtPrint').on('click', function(){
+    window.print();
+  });
+
+  $('#rtSubmit').on('click', function(){
+    if($('#tblReturn tbody tr').length === 0){
+      alert('Vui lòng tải phiếu mượn trước');
+      return;
+    }
+    
+    var msg = 'Xác nhận trả sách?\n\n';
+    msg += 'Sinh viên: ' + $('#rtStudentName').text() + '\n';
+    msg += 'MSSV: ' + $('#rtStudentId').text() + '\n';
+    msg += 'Số sách: ' + $('#rtBookCount').text() + '\n';
+    msg += 'Tổng phí phạt: ' + $('#rtTotalFee').text() + ' đ';
+    
+    if(confirm(msg)){
+      alert('Đã xác nhận trả sách thành công!\nPhí phạt: ' + $('#rtTotalFee').text() + ' đ');
+      // Reset form
+      $('#rtBorrowId').val('');
+      $('#studentInfoSection').hide();
+      $('#tblReturn tbody').empty();
+      $('#rtReturnDate').val(todayStr());
+    }
+  });
 })();
-    </script>
+</script>
 }

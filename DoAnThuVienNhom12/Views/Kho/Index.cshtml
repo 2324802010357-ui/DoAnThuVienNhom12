@@ -1,0 +1,392 @@
+﻿@{
+    ViewBag.Title = "Quản lý kho sách";
+}
+
+<style>
+    .warehouse-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .stat-card h3 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: bold;
+    }
+
+    .stat-card p {
+        margin: 5px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .warehouse-tabs {
+        border-bottom: 2px solid #e0e0e0;
+        margin-bottom: 20px;
+    }
+
+    .warehouse-tabs .nav-tabs {
+        border-bottom: none;
+    }
+
+    .warehouse-tabs .nav-tabs > li > a {
+        border-radius: 8px 8px 0 0;
+        margin-right: 5px;
+    }
+
+    .warehouse-tabs .nav-tabs > li.active > a {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+
+    .stock-level-low {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+    .stock-level-ok {
+        color: #27ae60;
+    }
+</style>
+
+<div class="animate-fade-in">
+    <div class="page-header">
+        <h2><i class="fa fa-warehouse"></i> Quản lý kho sách</h2>
+        <p class="lead">Quản lý tồn kho, nhập sách và theo dõi số lượng</p>
+    </div>
+
+    <!-- Thống kê nhanh -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                <h3 id="totalBooks">2,547</h3>
+                <p>Tổng số sách</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
+                <h3 id="availableBooks">2,234</h3>
+                <p>Sách có sẵn</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                <h3 id="borrowedBooks">313</h3>
+                <p>Đang cho mượn</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                <h3 id="lowStockBooks">12</h3>
+                <p>Sắp hết hàng</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="warehouse-tabs">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="active">
+                <a href="#inventory" role="tab" data-toggle="tab">
+                    <i class="fa fa-boxes"></i> Tồn kho
+                </a>
+            </li>
+            <li>
+                <a href="#import" role="tab" data-toggle="tab">
+                    <i class="fa fa-file-import"></i> Phiếu nhập
+                </a>
+            </li>
+            <li>
+                <a href="#history" role="tab" data-toggle="tab">
+                    <i class="fa fa-history"></i> Lịch sử
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Tab Tồn kho -->
+        <div class="tab-pane active" id="inventory">
+            <div class="warehouse-card">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm sách trong kho..." id="searchInventory">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <button class="btn btn-success" onclick="location.href='#import'" data-toggle="tab">
+                            <i class="fa fa-plus"></i> Nhập sách mới
+                        </button>
+                        <button class="btn btn-default">
+                            <i class="fa fa-download"></i> Xuất Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="margin-top:20px;">
+                    <table class="table table-hover" id="tblInventory">
+                        <thead>
+                            <tr class="active">
+                                <th>Mã sách</th>
+                                <th>Tên sách</th>
+                                <th>Tác giả</th>
+                                <th>NXB</th>
+                                <th>Tổng SL</th>
+                                <th>Có sẵn</th>
+                                <th>Đang mượn</th>
+                                <th>Vị trí</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Phiếu nhập -->
+        <div class="tab-pane" id="import">
+            <div class="warehouse-card">
+                <h3><i class="fa fa-file-import"></i> Tạo phiếu nhập sách</h3>
+                <hr>
+                
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Mã phiếu nhập:</label>
+                        <div class="col-sm-3">
+                            <input id="importId" class="form-control" placeholder="Tự động tạo..." readonly>
+                        </div>
+                        <label class="col-sm-2 control-label">Ngày nhập:</label>
+                        <div class="col-sm-3">
+                            <input id="importDate" type="date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Nhà cung cấp:</label>
+                        <div class="col-sm-4">
+                            <input id="importSupplier" class="form-control" placeholder="Nhập tên nhà cung cấp...">
+                        </div>
+                        <label class="col-sm-2 control-label">Người nhập:</label>
+                        <div class="col-sm-3">
+                            <input id="importStaff" class="form-control" value="NV001 - Admin" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="tblImport">
+                        <thead>
+                            <tr class="active">
+                                <th style="width:50px">STT</th>
+                                <th style="width:120px">Mã sách</th>
+                                <th>Tên sách</th>
+                                <th style="width:150px">Tác giả</th>
+                                <th style="width:150px">NXB</th>
+                                <th style="width:100px">SL nhập</th>
+                                <th style="width:120px">Đơn giá</th>
+                                <th style="width:120px">Thành tiền</th>
+                                <th style="width:80px"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div class="text-right">
+                    <button id="btnAddImportRow" type="button" class="btn btn-default">
+                        <i class="fa fa-plus"></i> Thêm sách
+                    </button>
+                </div>
+
+                <div class="row" style="margin-top:20px;">
+                    <div class="col-md-8"></div>
+                    <div class="col-md-4">
+                        <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:15px;">
+                            <div class="row">
+                                <div class="col-xs-6">Tổng số lượng:</div>
+                                <div class="col-xs-6 text-right"><strong id="importTotalQty">0</strong></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-6">Tổng tiền:</div>
+                                <div class="col-xs-6 text-right"><strong id="importTotalAmount">0</strong> đ</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-right" style="margin-top:15px;">
+                    <button class="btn btn-default" type="button" id="btnSaveDraft">
+                        <i class="fa fa-save"></i> Lưu tạm
+                    </button>
+                    <button class="btn btn-primary" type="button" id="btnSubmitImport">
+                        <i class="fa fa-check"></i> Xác nhận nhập kho
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Lịch sử -->
+        <div class="tab-pane" id="history">
+            <div class="warehouse-card">
+                <h3><i class="fa fa-history"></i> Lịch sử nhập kho</h3>
+                <div class="table-responsive" style="margin-top:20px;">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr class="active">
+                                <th>Mã phiếu</th>
+                                <th>Ngày nhập</th>
+                                <th>Nhà cung cấp</th>
+                                <th>Người nhập</th>
+                                <th>SL sách</th>
+                                <th>Tổng tiền</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tblHistory"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function(){
+    // Data mẫu
+    var INVENTORY = [
+        {code:'S001', title:'Lập trình C# nâng cao', author:'Kazami Yuki', publisher:'NXB Giáo dục', total:50, available:45, borrowed:5, location:'Kệ A - Ngăn 1'},
+        {code:'S002', title:'Cấu trúc dữ liệu', author:'Nguyễn Đức Nghĩa', publisher:'NXB ĐHQG', total:30, available:28, borrowed:2, location:'Kệ A - Ngăn 2'},
+        {code:'S003', title:'Toán cao cấp A1', author:'Nguyễn Nhật Ánh', publisher:'NXB Khoa học', total:8, available:5, borrowed:3, location:'Kệ B - Ngăn 1'},
+        {code:'S004', title:'Thuật toán ứng dụng', author:'Haruki Murakami', publisher:'NXB Thông tin', total:25, available:20, borrowed:5, location:'Kệ A - Ngăn 3'}
+    ];
+
+    var IMPORT_HISTORY = [
+        {id:'PN001', date:'2024-01-15', supplier:'NXB Giáo dục', staff:'NV001', qty:100, amount:15000000},
+        {id:'PN002', date:'2024-01-20', supplier:'NXB ĐHQG', staff:'NV002', qty:50, amount:8500000}
+    ];
+
+    // Render tồn kho
+    function renderInventory(){
+        var tb = $('#tblInventory tbody').empty();
+        INVENTORY.forEach(function(item){
+            var stockClass = item.available < 10 ? 'stock-level-low' : 'stock-level-ok';
+            var tr = $('<tr/>');
+            tr.append('<td>'+item.code+'</td>');
+            tr.append('<td>'+item.title+'</td>');
+            tr.append('<td>'+item.author+'</td>');
+            tr.append('<td>'+item.publisher+'</td>');
+            tr.append('<td class="text-center">'+item.total+'</td>');
+            tr.append('<td class="text-center '+stockClass+'">'+item.available+'</td>');
+            tr.append('<td class="text-center">'+item.borrowed+'</td>');
+            tr.append('<td>'+item.location+'</td>');
+            tr.append('<td><button class="btn btn-xs btn-primary"><i class="fa fa-edit"></i></button> '+
+                      '<button class="btn btn-xs btn-info"><i class="fa fa-eye"></i></button></td>');
+            tb.append(tr);
+        });
+    }
+
+    // Render lịch sử
+    function renderHistory(){
+        var tb = $('#tblHistory').empty();
+        IMPORT_HISTORY.forEach(function(item){
+            var tr = $('<tr/>');
+            tr.append('<td>'+item.id+'</td>');
+            tr.append('<td>'+item.date+'</td>');
+            tr.append('<td>'+item.supplier+'</td>');
+            tr.append('<td>'+item.staff+'</td>');
+            tr.append('<td class="text-center">'+item.qty+'</td>');
+            tr.append('<td class="text-right">'+item.amount.toLocaleString('vi-VN')+' đ</td>');
+            tr.append('<td><button class="btn btn-xs btn-info"><i class="fa fa-eye"></i> Xem</button></td>');
+            tb.append(tr);
+        });
+    }
+
+    // Phiếu nhập
+    var importCounter = 1;
+    function addImportRow(){
+        var rowNum = $('#tblImport tbody tr').length + 1;
+        var tr = $('<tr/>');
+        tr.append('<td class="text-center"><strong>'+rowNum+'</strong></td>');
+        tr.append('<td><input class="form-control input-code" placeholder="Mã sách"></td>');
+        tr.append('<td><input class="form-control input-title" placeholder="Tên sách"></td>');
+        tr.append('<td><input class="form-control input-author" placeholder="Tác giả"></td>');
+        tr.append('<td><input class="form-control input-publisher" placeholder="NXB"></td>');
+        tr.append('<td><input type="number" class="form-control input-qty" value="1" min="1"></td>');
+        tr.append('<td><input type="number" class="form-control input-price" value="0" min="0"></td>');
+        tr.append('<td class="text-right td-total">0</td>');
+        tr.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs remove-row">'+
+                  '<i class="fa fa-trash"></i></button></td>');
+        $('#tblImport tbody').append(tr);
+        updateImportTotal();
+    }
+
+    function updateImportTotal(){
+        var totalQty = 0;
+        var totalAmount = 0;
+        
+        $('#tblImport tbody tr').each(function(index){
+            $(this).find('td:first strong').text(index + 1);
+            var qty = parseInt($(this).find('.input-qty').val()) || 0;
+            var price = parseInt($(this).find('.input-price').val()) || 0;
+            var rowTotal = qty * price;
+            
+            $(this).find('.td-total').text(rowTotal.toLocaleString('vi-VN'));
+            totalQty += qty;
+            totalAmount += rowTotal;
+        });
+        
+        $('#importTotalQty').text(totalQty);
+        $('#importTotalAmount').text(totalAmount.toLocaleString('vi-VN'));
+    }
+
+    $('#btnAddImportRow').on('click', addImportRow);
+    $('#tblImport').on('click', '.remove-row', function(){
+        $(this).closest('tr').remove();
+        updateImportTotal();
+    });
+    $('#tblImport').on('change', '.input-qty, .input-price', updateImportTotal);
+
+    // Initialize
+    $('#importDate').val(new Date().toISOString().slice(0,10));
+    $('#importId').val('PN' + String(IMPORT_HISTORY.length + 1).padStart(3, '0'));
+    
+    renderInventory();
+    renderHistory();
+    addImportRow();
+
+    $('#btnSubmitImport').on('click', function(){
+        if($('#tblImport tbody tr').length === 0){
+            alert('Vui lòng thêm sách vào phiếu nhập');
+            return;
+        }
+        if(!$('#importSupplier').val()){
+            alert('Vui lòng nhập nhà cung cấp');
+            return;
+        }
+        alert('Đã nhập kho thành công!\nSố lượng: '+$('#importTotalQty').text()+'\nTổng tiền: '+$('#importTotalAmount').text()+' đ');
+    });
+})();
+</script>
+}
