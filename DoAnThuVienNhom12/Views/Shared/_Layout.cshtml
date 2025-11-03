@@ -43,47 +43,123 @@
                     <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="@Url.Action("Index","Home")">
-                    <i class="fa fa-book"></i> DoAnThuVienNhom12
+                    <i class="fa fa-book"></i> Thư viện
                 </a>
             </div>
 
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="nav navbar-nav">
                     <li class="@IsActive("Home","Index")">
-                        <a href="@Url.Action("Index","Home")">Trang chủ</a>
+                        <a href="@Url.Action("Index","Home")">
+                            <i class="fa fa-home"></i> Trang chủ
+                        </a>
                     </li>
 
                     <li class="@IsActive("DanhMuc")">
-                        <a href="@Url.Action("Index","DanhMuc")">Danh mục</a>
+                        <a href="@Url.Action("Index","DanhMuc")">
+                            <i class="fa fa-folder"></i> Danh mục
+                        </a>
                     </li>
 
-                    <li class="@IsActive("Sach")">
-                        <a href="@Url.Action("Index","Sach")">Sách</a>
-                    </li>
-                    <li class="dropdown @(IsActive("MuonTra","PhieuMuon")== "active" || IsActive("MuonTra","PhieuTra")== "active" ? "active" : "")">
+                    <!-- Dropdown: Quản lý sách -->
+                    <li class="dropdown @(IsActive("Sach") == "active" ? "active" : "")">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true">
-                            <i class="fa fa-file-text-o"></i> Phiếu <span class="caret"></span>
+                            <i class="fa fa-book"></i> Quản lý sách <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li class="@IsActive("MuonTra","PhieuMuon")">
-                                <a href="@Url.Action("PhieuMuon","MuonTra")"><i class="fa fa-download"></i> Phiếu mượn</a>
+                            <li class="@IsActive("Sach","Index")">
+                                <a href="@Url.Action("Index","Sach")">
+                                    <i class="fa fa-search"></i> Tìm kiếm sách
+                                </a>
                             </li>
-                            <li class="@IsActive("MuonTra","PhieuTra")">
-                                <a href="@Url.Action("PhieuTra","MuonTra")"><i class="fa fa-upload"></i> Phiếu trả</a>
+                            <li class="@IsActive("Sach","Edit")">
+                                <a href="@Url.Action("Edit","Sach")">
+                                    <i class="fa fa-edit"></i> Cập nhật sách
+                                </a>
+                            </li>
+                            <li role="separator" class="divider"></li>
+                            <li class="@IsActive("KeSach")">
+                                <a href="@Url.Action("Index","KeSach")">
+                                    <i class="fa fa-th"></i> Quản lý kệ sách
+                                </a>
+                            </li>
+                            <li class="@IsActive("Kho")">
+                                <a href="@Url.Action("Index","Kho")">
+                                    <i class="fa fa-warehouse"></i> Quản lý kho
+                                </a>
                             </li>
                         </ul>
                     </li>
 
-                    <li class="@IsActive("NguoiDung")">
-                        <a href="@Url.Action("Index","NguoiDung")">Đăng nhập</a>
+                    <!-- Dropdown: Mượn/Trả -->
+                    <li class="dropdown @(IsActive("MuonTra") == "active" ? "active" : "")">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true">
+                            <i class="fa fa-exchange"></i> Mượn/Trả <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="@IsActive("MuonTra","PhieuMuon")">
+                                <a href="@Url.Action("PhieuMuon","MuonTra")">
+                                    <i class="fa fa-download"></i> Phiếu mượn
+                                </a>
+                            </li>
+                            <li class="@IsActive("MuonTra","PhieuTra")">
+                                <a href="@Url.Action("PhieuTra","MuonTra")">
+                                    <i class="fa fa-upload"></i> Phiếu trả
+                                </a>
+                            </li>
+                            <li role="separator" class="divider"></li>
+                            <li class="@IsActive("MuonTra","Index")">
+                                <a href="@Url.Action("Index","MuonTra")">
+                                    <i class="fa fa-list"></i> Danh sách phiếu
+                                </a>
+                            </li>
+                        </ul>
                     </li>
 
                     <li class="@IsActive("NhanVien")">
-                        <a href="@Url.Action("Index","NhanVien")">Nhân sự</a>
+                        <a href="@Url.Action("Index","NhanVien")">
+                            <i class="fa fa-users"></i> Nhân viên
+                        </a>
+                    </li>
+
+                    <li class="@IsActive("NguoiDung")">
+                        <a href="@Url.Action("Index","NguoiDung")">
+                            <i class="fa fa-sign-in"></i> Đăng nhập
+                        </a>
                     </li>
                 </ul>
 
-                @* thêm phần user dropdown/ search ... nếu cần *@
+                <!-- Right side menu -->
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+                            <i class="fa fa-cog"></i> Tiện ích <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li class="@IsActive("KeSach")">
+                                <a href="@Url.Action("Index","KeSach")">
+                                    <i class="fa fa-th"></i> Kệ sách
+                                </a>
+                            </li>
+                            <li class="@IsActive("Kho")">
+                                <a href="@Url.Action("Index","Kho")">
+                                    <i class="fa fa-warehouse"></i> Quản lý kho
+                                </a>
+                            </li>
+                            <li role="separator" class="divider"></li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-bar-chart"></i> Báo cáo
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fa fa-cogs"></i> Cài đặt
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -92,7 +168,7 @@
         @RenderBody()
         <hr />
         <footer class="text-muted">
-            <p class="text-center">&copy; @DateTime.Now.Year DoAnThuVienNhom12</p>
+            <p class="text-center">&copy; @DateTime.Now.Year - Hệ thống Quản lý Thư viện</p>
         </footer>
     </div>
 

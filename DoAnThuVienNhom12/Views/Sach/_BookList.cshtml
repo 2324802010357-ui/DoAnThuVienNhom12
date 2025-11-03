@@ -1,4 +1,4 @@
-@model List<DoAnThuVienNhom12.Controllers.SachModel>
+﻿@model List<DoAnThuVienNhom12.Controllers.SachModel>
 
 @if (Model != null && Model.Any())
 {
@@ -11,7 +11,7 @@
                         <img src="https://placehold.co/120x160/667eea/ffffff?text=@sach.MaSach" alt="@sach.TenSach" class="img-responsive">
                         <div class="book-overlay">
                             <a href="@Url.Action("Detail", "Sach", new { id = sach.MaSach })" class="btn btn-primary btn-sm">
-                                <i class="fa fa-eye"></i> Xem chi ti?t
+                                <i class="fa fa-eye"></i> Xem chi tiết
                             </a>
                         </div>
                     </div>

@@ -186,7 +186,6 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Sach\Index.cshtml" />
     <Content Include="Views\Sach\Search.cshtml" />
-    <Content Include="Views\Sach\Detail.cshtml" />
     <Content Include="Views\DanhMuc\Index.cshtml" />
     <Content Include="Views\MuonTra\Index.cshtml" />
     <Content Include="Views\NguoiDung\Login.cshtml" />
@@ -199,6 +198,8 @@
     <Content Include="Views\Sach\_BookList.cshtml" />
     <Content Include="Views\Kho\Index.cshtml" />
     <Content Include="Views\KeSach\Index.cshtml" />
+    <Content Include="Views\Sach\Edit.cshtml" />
+    <Content Include="Views\Sach\Detail.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

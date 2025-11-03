@@ -1,0 +1,370 @@
+﻿@{
+    ViewBag.Title = "Cập nhật thông tin sách";
+}
+
+<style>
+    .edit-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+
+    .form-section {
+        background: #f9f9f9;
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+
+    .form-section h4 {
+        margin-top: 0;
+        color: #667eea;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: red;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        font-size: 16px;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(135deg, #764ba2, #667eea);
+        color: white;
+    }
+</style>
+
+<div class="animate-fade-in">
+    <!-- Breadcrumb -->
+    <ol class="breadcrumb">
+        <li><a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Trang chủ</a></li>
+        <li><a href="@Url.Action("Index", "Sach")"><i class="fa fa-book"></i> Danh sách sách</a></li>
+        <li class="active">Cập nhật sách</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="edit-card">
+                <div class="page-header">
+                    <h2><i class="fa fa-edit"></i> Cập nhật thông tin sách</h2>
+                    <p class="lead">Điền đầy đủ thông tin để cập nhật sách vào hệ thống</p>
+                </div>
+
+                <form id="bookEditForm" class="form-horizontal">
+                    <!-- Thông tin cơ bản -->
+                    <div class="form-section">
+                        <h4><i class="fa fa-info-circle"></i> Thông tin cơ bản</h4>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label required-field">Mã sách</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="bookCode" value="S001" readonly>
+                                <small class="text-muted">Mã sách không thể thay đổi</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label required-field">Tên sách</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="bookTitle" 
+                                       placeholder="Nhập tên sách..." value="Lập trình C# nâng cao" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Tên phụ</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="bookSubtitle" 
+                                       placeholder="Tên phụ (nếu có)..." value="Từ cơ bản đến chuyên sâu">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label required-field">Tác giả</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="bookAuthor" 
+                                       placeholder="Nhập tên tác giả..." value="Nguyễn Văn A" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label required-field">Danh mục</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="bookCategory" required>
+                                    <option value="">-- Chọn danh mục --</option>
+                                    <option value="DM001" selected>Công nghệ thông tin</option>
+                                    <option value="DM002">Toán học</option>
+                                    <option value="DM003">Văn học</option>
+                                    <option value="DM004">Kinh tế</option>
+                                    <option value="DM005">Ngoại ngữ</option>
+                                    <option value="DM006">Khoa học tự nhiên</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin xuất bản -->
+                    <div class="form-section" style="border-left-color:#27ae60;">
+                        <h4><i class="fa fa-building"></i> Thông tin xuất bản</h4>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label required-field">Nhà xuất bản</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="bookPublisher" required>
+                                    <option value="">-- Chọn NXB --</option>
+                                    <option value="NXB001" selected>NXB Giáo dục Việt Nam</option>
+                                    <option value="NXB002">NXB Đại học Quốc gia</option>
+                                    <option value="NXB003">NXB Khoa học & Kỹ thuật</option>
+                                    <option value="NXB004">NXB Thông tin & Truyền thông</option>
+                                    <option value="NXB005">NXB Trẻ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label required-field">Năm xuất bản</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control" id="bookYear" 
+                                       min="1900" max="2099" value="2023" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Số trang</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control" id="bookPages" 
+                                       min="1" value="450">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Ngôn ngữ</label>
+                            <div class="col-sm-4">
+                                <select class="form-control" id="bookLanguage">
+                                    <option value="vi" selected>Tiếng Việt</option>
+                                    <option value="en">Tiếng Anh</option>
+                                    <option value="zh">Tiếng Trung</option>
+                                    <option value="ja">Tiếng Nhật</option>
+                                    <option value="ko">Tiếng Hàn</option>
+                                    <option value="other">Khác</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Số lượng và giá -->
+                    <div class="form-section" style="border-left-color:#f39c12;">
+                        <h4><i class="fa fa-cubes"></i> Số lượng và giá</h4>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label required-field">Tổng số lượng</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control" id="totalQty" 
+                                       min="0" value="50" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Số lượng có sẵn</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control" id="availableQty" 
+                                       min="0" value="45" readonly>
+                                <small class="text-muted">Tự động tính toán</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Đang mượn</label>
+                            <div class="col-sm-4">
+                                <input type="number" class="form-control" id="borrowedQty" 
+                                       min="0" value="5" readonly>
+                                <small class="text-muted">Tự động tính toán</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Giá nhập</label>
+                            <div class="col-sm-4">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="importPrice" 
+                                           min="0" value="180000">
+                                    <span class="input-group-addon">đ</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Giá bìa</label>
+                            <div class="col-sm-4">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="retailPrice" 
+                                           min="0" value="250000">
+                                    <span class="input-group-addon">đ</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vị trí -->
+                    <div class="form-section" style="border-left-color:#e74c3c;">
+                        <h4><i class="fa fa-map-marker"></i> Vị trí trong thư viện</h4>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Kệ sách</label>
+                            <div class="col-sm-4">
+                                <select class="form-control" id="bookShelf">
+                                    <option value="">-- Chọn kệ --</option>
+                                    <option value="KE_A" selected>Kệ A - Lập trình</option>
+                                    <option value="KE_B">Kệ B - Toán học</option>
+                                    <option value="KE_C">Kệ C - Văn học</option>
+                                    <option value="KE_D">Kệ D - Kinh tế</option>
+                                    <option value="KE_E">Kệ E - Ngoại ngữ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Ngăn</label>
+                            <div class="col-sm-4">
+                                <select class="form-control" id="bookSection">
+                                    <option value="">-- Chọn ngăn --</option>
+                                    <option value="NA1" selected>Ngăn 1</option>
+                                    <option value="NA2">Ngăn 2</option>
+                                    <option value="NA3">Ngăn 3</option>
+                                    <option value="NA4">Ngăn 4</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="form-section" style="border-left-color:#9b59b6;">
+                        <h4><i class="fa fa-align-left"></i> Mô tả</h4>
+                        
+                        <div class="form-group">
+                            <label class="col-sm-12 control-label" style="text-align:left;">Mô tả chi tiết</label>
+                            <div class="col-sm-12">
+                                <textarea class="form-control" id="bookDescription" rows="6" 
+                                          placeholder="Nhập mô tả sách...">Cuốn sách "Lập trình C# nâng cao" là tài liệu toàn diện dành cho những người muốn nâng cao kỹ năng lập trình C#. Sách bao gồm các chủ đề từ cơ bản đến nâng cao như OOP, LINQ, Entity Framework, ASP.NET.</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-12 control-label" style="text-align:left;">Từ khóa</label>
+                            <div class="col-sm-12">
+                                <input type="text" class="form-control" id="bookTags" 
+                                       placeholder="Nhập các từ khóa, cách nhau bằng dấu phẩy..." 
+                                       value="C#, .NET, Lập trình, OOP, ASP.NET">
+                                <small class="text-muted">Ví dụ: C#, .NET, Lập trình</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="form-group">
+                        <div class="col-sm-12 text-right">
+                            <a href="@Url.Action("Index", "Sach")" class="btn btn-default btn-lg">
+                                <i class="fa fa-times"></i> Hủy bỏ
+                            </a>
+                            <button type="button" class="btn btn-info btn-lg" id="btnPreview">
+                                <i class="fa fa-eye"></i> Xem trước
+                            </button>
+                            <button type="submit" class="btn btn-save btn-lg">
+                                <i class="fa fa-save"></i> Lưu thay đổi
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+$(document).ready(function(){
+    var bookId = '@ViewBag.Id' || 'S001';
+    
+    // Load ngăn theo kệ
+    $('#bookShelf').on('change', function(){
+        var shelf = $(this).val();
+        var sectionSelect = $('#bookSection');
+        sectionSelect.empty().append('<option value="">-- Chọn ngăn --</option>');
+        
+        for(var i = 1; i <= 4; i++){
+            sectionSelect.append('<option value="N' + shelf + i + '">Ngăn ' + i + '</option>');
+        }
+    });
+    
+    // Tính số lượng có sẵn
+    $('#totalQty, #borrowedQty').on('change', function(){
+        var total = parseInt($('#totalQty').val()) || 0;
+        var borrowed = parseInt($('#borrowedQty').val()) || 0;
+        var available = total - borrowed;
+        $('#availableQty').val(available >= 0 ? available : 0);
+    });
+    
+    // Xem trước
+    $('#btnPreview').on('click', function(){
+        var bookCode = $('#bookCode').val();
+        window.open('@Url.Action("Detail", "Sach")?id=' + bookCode, '_blank');
+    });
+    
+    // Submit form
+    $('#bookEditForm').on('submit', function(e){
+        e.preventDefault();
+        
+        // Validate
+        if(!$('#bookTitle').val()){
+            alert('Vui lòng nhập tên sách');
+            $('#bookTitle').focus();
+            return;
+        }
+        
+        if(!$('#bookAuthor').val()){
+            alert('Vui lòng nhập tác giả');
+            $('#bookAuthor').focus();
+            return;
+        }
+        
+        // Collect data
+        var formData = {
+            MaSach: $('#bookCode').val(),
+            TenSach: $('#bookTitle').val(),
+            TenPhu: $('#bookSubtitle').val(),
+            TacGia: $('#bookAuthor').val(),
+            MaDanhMuc: $('#bookCategory').val(),
+            MaNXB: $('#bookPublisher').val(),
+            NamXuatBan: $('#bookYear').val(),
+            SoTrang: $('#bookPages').val(),
+            NgonNgu: $('#bookLanguage').val(),
+            SoLuongTong: $('#totalQty').val(),
+            SoLuongCoSan: $('#availableQty').val(),
+            SoLuongDangMuon: $('#borrowedQty').val(),
+            GiaNhap: $('#importPrice').val(),
+            GiaBia: $('#retailPrice').val(),
+            MaKe: $('#bookShelf').val(),
+            MaNgan: $('#bookSection').val(),
+            MoTa: $('#bookDescription').val(),
+            TuKhoa: $('#bookTags').val()
+        };
+        
+        console.log('Updating book:', formData);
+        
+        if(confirm('Bạn có chắc muốn lưu thay đổi?')){
+            alert('Đã cập nhật thông tin sách thành công!\nMã sách: ' + formData.MaSach);
+            window.location.href = '@Url.Action("Detail", "Sach")?id=' + formData.MaSach;
+        }
+    });
+});
+</script>
+}

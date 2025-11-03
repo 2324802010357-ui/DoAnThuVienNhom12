@@ -116,7 +116,57 @@ namespace DoAnThuVienNhom12.Controllers
             }
             
             ViewBag.Title = sach.TenSach;
+            ViewBag.Id = id;
             return View(sach);
+        }
+
+        // GET: Chỉnh sửa sách
+        public ActionResult Edit(string id)
+        {
+            // Nếu không có id, lấy sách đầu tiên để demo
+            if (string.IsNullOrEmpty(id))
+            {
+                id = "S001";
+            }
+            
+            var sach = _sachs.FirstOrDefault(s => s.MaSach == id);
+            if (sach == null)
+            {
+                return HttpNotFound();
+            }
+            
+            ViewBag.Title = "Cập nhật: " + sach.TenSach;
+            ViewBag.Id = id;
+            return View(sach);
+        }
+
+        // POST: Lưu chỉnh sửa sách
+        [HttpPost]
+        public ActionResult Edit(SachModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var sach = _sachs.FirstOrDefault(s => s.MaSach == model.MaSach);
+                if (sach != null)
+                {
+                    // Cập nhật thông tin
+                    sach.TenSach = model.TenSach;
+                    sach.TacGia = model.TacGia;
+                    sach.TheLoai = model.TheLoai;
+                    sach.DanhMuc = model.DanhMuc;
+                    sach.NhaXuatBan = model.NhaXuatBan;
+                    sach.NamXuatBan = model.NamXuatBan;
+                    sach.SoTrang = model.SoTrang;
+                    sach.TinhTrang = model.TinhTrang;
+                    sach.SoLuong = model.SoLuong;
+                    sach.MoTa = model.MoTa;
+                    
+                    TempData["SuccessMessage"] = "Cập nhật sách thành công!";
+                    return RedirectToAction("Detail", new { id = model.MaSach });
+                }
+            }
+            
+            return View(model);
         }
 
         // Lấy danh sách thể loại
