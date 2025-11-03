@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="ba7e59ea42474aa5a3e10d81932d12a7" Name="Diagram1" ZoomLevel="41">
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.ChiTietPhieuMuon" Width="1.5" PointX="7.5" PointY="4.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.ChiTietPhieuNhap" Width="1.5" PointX="10.5" PointY="5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.DanhMuc" Width="1.5" PointX="0.625" PointY="8.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.DocGia" Width="1.5" PointX="14.75" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.KeSach" Width="1.5" PointX="3" PointY="5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.Kho" Width="1.5" PointX="0.75" PointY="5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.NguoiDung" Width="1.5" PointX="10" PointY="9" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.NhanVien" Width="1.5" PointX="17.125" PointY="12.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.NhaXuatBan" Width="1.5" PointX="3.125" PointY="9.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.PhieuMuon" Width="1.5" PointX="4.875" PointY="14.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.PhieuNhapKho" Width="1.5" PointX="8.25" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.PhieuTra" Width="1.5" PointX="12" PointY="11.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.Sach" Width="1.5" PointX="5.25" PointY="3.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.TacGia" Width="1.5" PointX="2.5" PointY="12.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="DoAnThuVienNhom12Model.VaiTro" Width="1.5" PointX="7.75" PointY="9.5" IsExpanded="true" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__ChiTietPh__MaPhi__6FE99F9F" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__ChiTietPh__MaSac__70DDC3D8" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__ChiTietPh__MaPhi__7F2BE32F" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__ChiTietPh__MaSac__00200768" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__Sach__MaDanhMuc__571DF1D5" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__PhieuMuon__MaDoc__6A30C649" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__KeSach__MaKho__4D94879B" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__Sach__MaKe__59FA5E80" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__NguoiDung__MaVai__3E52440B" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__PhieuMuon__MaNha__6B24EA82" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__PhieuNhap__MaNha__7C4F7684" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__Sach__MaNXB__59063A47" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__PhieuTra__MaPhie__76969D2E" ManuallyRouted="false" />
+        <AssociationConnector Association="DoAnThuVienNhom12Model.FK__Sach__MaTacGia__5812160E" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
