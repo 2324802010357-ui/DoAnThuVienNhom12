@@ -1,0 +1,75 @@
+﻿@model IEnumerable<DoAnThuVienNhom12.Models.PhieuTra>
+
+<div class="panel panel-success" style="margin-top:20px;">
+    <div class="panel-heading">
+        <h3 style="margin:0;">
+            <i class="fa fa-check-circle"></i> Danh sách phiếu đã trả
+        </h3>
+    </div>
+
+    <div class="panel-body">
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> Chưa có phiếu trả nào.
+            </div>
+        }
+        else
+        {
+            <table class="table table-bordered table-hover">
+                <thead style="background:#e8f8f0;">
+                    <tr>
+                        <th style="width:120px;">Mã phiếu trả</th>
+                        <th style="width:120px;">Mã phiếu mượn</th>
+                        <th>Độc giả</th>
+                        <th>MSSV</th>
+                        <th style="width:130px;">Ngày trả</th>
+                        <th style="width:130px;">Tiền phạt</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        // EF5: không hỗ trợ ?. nên phải tách biến
+                        var phieuMuon = p.PhieuMuon;
+                        var docGia = (phieuMuon != null ? phieuMuon.DocGia : null);
+
+                        <tr>
+                            <!-- Mã phiếu trả -->
+                            <td class="text-center">
+                                <strong>@p.MaPhieuTra</strong>
+                            </td>
+
+                            <!-- Mã phiếu mượn -->
+                            <td class="text-center">@p.MaPhieuMuon</td>
+
+                            <!-- Tên độc giả -->
+                            <td>
+                                @(docGia != null ? docGia.HoTen : "Không rõ")
+                            </td>
+
+                            <!-- MSSV -->
+                            <td>
+                                @(docGia != null ? docGia.MaSinhVien : "")
+                            </td>
+
+                            <!-- Ngày trả -->
+                            <td class="text-center">
+                                @(p.NgayTra.HasValue
+                                    ? p.NgayTra.Value.ToString("dd/MM/yyyy")
+                                    : "")
+                            </td>
+
+                            <!-- Tiền phạt -->
+                            <td class="text-right">
+                                <strong>@String.Format("{0:N0} đ", p.TienPhat)</strong>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

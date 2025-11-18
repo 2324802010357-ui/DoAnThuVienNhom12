@@ -1,173 +1,166 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
+using DoAnThuVienNhom12.Models;
 
 namespace DoAnThuVienNhom12.Controllers
 {
     public class DanhMucController : Controller
     {
-        // Dữ liệu mẫu danh mục sách
-        private static List<DanhMucSachModel> _danhMucSachs = new List<DanhMucSachModel>
-        {
-            new DanhMucSachModel { MaDanhMuc = "DM001", TenDanhMuc = "Văn học", MoTa = "Sách văn học Việt Nam và thế giới", SoLuongSach = 150, TrangThai = "Hoạt động" },
-            new DanhMucSachModel { MaDanhMuc = "DM002", TenDanhMuc = "Khoa học", MoTa = "Sách khoa học tự nhiên", SoLuongSach = 89, TrangThai = "Hoạt động" },
-            new DanhMucSachModel { MaDanhMuc = "DM003", TenDanhMuc = "Lịch sử", MoTa = "Sách lịch sử Việt Nam và thế giới", SoLuongSach = 67, TrangThai = "Hoạt động" },
-            new DanhMucSachModel { MaDanhMuc = "DM004", TenDanhMuc = "Tin học", MoTa = "Sách công nghệ thông tin", SoLuongSach = 45, TrangThai = "Tạm ngưng" },
-            new DanhMucSachModel { MaDanhMuc = "DM005", TenDanhMuc = "Ngoại ngữ", MoTa = "Sách học ngoại ngữ", SoLuongSach = 32, TrangThai = "Hoạt động" }
-        };
+        private readonly DoAnThuVienNhom12Entities db = new DoAnThuVienNhom12Entities();
 
-        // Hiển thị danh sách danh mục
+        // ======================= TRANG DANH SÁCH =======================
         public ActionResult Index()
         {
-            ViewBag.Title = "Quản lý danh mục sách";
-            return View(_danhMucSachs);
+            var list = db.DanhMucs
+                .Select(dm => new DanhMucSachModel
+                {
+                    MaDanhMuc = dm.MaDanhMuc,
+                    TenDanhMuc = dm.TenDanhMuc,
+                    MoTa = dm.MoTa,
+                    TrangThai = dm.TrangThai,
+                    SoLuongSach = dm.Saches.Count()
+                })
+                .OrderBy(x => x.TenDanhMuc)
+                .ToList();
+
+            return View(list);
         }
 
-        // Thêm danh mục sách mới
+        // ======================= THÊM DANH MỤC =======================
         [HttpPost]
-        public ActionResult ThemDanhMucSach(DanhMucSachModel model)
+        public JsonResult ThemDanhMuc(string TenDanhMuc, string MoTa, string TrangThai)
         {
             try
             {
-                if (ModelState.IsValid)
-                {
-                    // Kiểm tra mã danh mục đã tồn tại
-                    if (_danhMucSachs.Any(dm => dm.MaDanhMuc == model.MaDanhMuc))
-                    {
-                        return Json(new { success = false, message = "Mã danh mục đã tồn tại!" });
-                    }
+                if (string.IsNullOrWhiteSpace(TenDanhMuc))
+                    return Json(new { success = false, message = "⚠️ Tên danh mục không được để trống!" });
 
-                    // Kiểm tra tên danh mục đã tồn tại
-                    if (_danhMucSachs.Any(dm => dm.TenDanhMuc.ToLower() == model.TenDanhMuc.ToLower()))
-                    {
-                        return Json(new { success = false, message = "Tên danh mục đã tồn tại!" });
-                    }
+                // Kiểm tra trùng tên
+                bool existed = db.DanhMucs.Any(dm => dm.TenDanhMuc.ToLower() == TenDanhMuc.ToLower());
+                if (existed)
+                    return Json(new { success = false, message = "❌ Tên danh mục đã tồn tại!" });
 
-                    model.SoLuongSach = 0; // Mới tạo chưa có sách
-                    _danhMucSachs.Add(model);
-                    return Json(new { success = true, message = "Thêm danh mục sách thành công!" });
-                }
-                else
+                var newDM = new DanhMuc
                 {
-                    return Json(new { success = false, message = "Dữ liệu không hợp lệ!" });
-                }
+                    TenDanhMuc = TenDanhMuc.Trim(),
+                    MoTa = MoTa?.Trim(),
+                    TrangThai = string.IsNullOrEmpty(TrangThai) ? "Hoạt động" : TrangThai,
+                    NgayTao = DateTime.Now
+                };
+
+                db.DanhMucs.Add(newDM);
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "✅ Thêm danh mục thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
 
-        // Sửa thông tin danh mục sách
+        // ======================= SỬA DANH MỤC =======================
         [HttpPost]
-        public ActionResult SuaThongTinDanhMucSach(DanhMucSachModel model)
+        public JsonResult SuaDanhMuc(int MaDanhMuc, string TenDanhMuc, string MoTa, string TrangThai)
         {
             try
             {
-                var existingDanhMuc = _danhMucSachs.FirstOrDefault(dm => dm.MaDanhMuc == model.MaDanhMuc);
-                if (existingDanhMuc != null)
-                {
-                    // Kiểm tra tên danh mục trùng với danh mục khác
-                    if (_danhMucSachs.Any(dm => dm.TenDanhMuc.ToLower() == model.TenDanhMuc.ToLower() && dm.MaDanhMuc != model.MaDanhMuc))
-                    {
-                        return Json(new { success = false, message = "Tên danh mục đã được sử dụng!" });
-                    }
+                var dm = db.DanhMucs.Find(MaDanhMuc);
+                if (dm == null)
+                    return Json(new { success = false, message = "❌ Không tìm thấy danh mục!" });
 
-                    // Cập nhật thông tin
-                    existingDanhMuc.TenDanhMuc = model.TenDanhMuc;
-                    existingDanhMuc.MoTa = model.MoTa;
-                    existingDanhMuc.TrangThai = model.TrangThai;
+                // Kiểm tra trùng tên
+                bool existed = db.DanhMucs.Any(x => x.TenDanhMuc.ToLower() == TenDanhMuc.ToLower() && x.MaDanhMuc != MaDanhMuc);
+                if (existed)
+                    return Json(new { success = false, message = "⚠️ Tên danh mục đã được sử dụng!" });
 
-                    return Json(new { success = true, message = "Cập nhật danh mục sách thành công!" });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Không tìm thấy danh mục!" });
-                }
+                dm.TenDanhMuc = TenDanhMuc.Trim();
+                dm.MoTa = MoTa?.Trim();
+                dm.TrangThai = TrangThai?.Trim();
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "✅ Cập nhật danh mục thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
 
-        // Xóa danh mục sách
+        // ======================= XÓA DANH MỤC =======================
         [HttpPost]
-        public ActionResult XoaDanhMucSach(string maDanhMuc)
+        public JsonResult XoaDanhMuc(int MaDanhMuc)
         {
             try
             {
-                var danhMuc = _danhMucSachs.FirstOrDefault(dm => dm.MaDanhMuc == maDanhMuc);
-                if (danhMuc != null)
-                {
-                    // Kiểm tra danh mục có sách hay không
-                    if (danhMuc.SoLuongSach > 0)
-                    {
-                        return Json(new { success = false, message = "Không thể xóa danh mục đang có sách!" });
-                    }
+                var dm = db.DanhMucs.Find(MaDanhMuc);
+                if (dm == null)
+                    return Json(new { success = false, message = "❌ Không tìm thấy danh mục!" });
 
-                    _danhMucSachs.Remove(danhMuc);
-                    return Json(new { success = true, message = "Xóa danh mục sách thành công!" });
-                }
-                else
-                {
-                    return Json(new { success = false, message = "Không tìm thấy danh mục!" });
-                }
+                bool hasBooks = db.Saches.Any(s => s.MaDanhMuc == MaDanhMuc);
+                if (hasBooks)
+                    return Json(new { success = false, message = "⚠️ Không thể xóa danh mục đang có sách!" });
+
+                db.DanhMucs.Remove(dm);
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "✅ Xóa danh mục thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
             }
         }
 
-        // Tìm kiếm danh mục
+        // ======================= TÌM KIẾM DANH MỤC =======================
         [HttpPost]
         public ActionResult TimKiemDanhMuc(string searchTerm, string trangThai)
         {
-            var result = _danhMucSachs.AsQueryable();
+            var query = db.DanhMucs.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                result = result.Where(dm => 
-                    dm.MaDanhMuc.ToLower().Contains(searchTerm.ToLower()) ||
-                    dm.TenDanhMuc.ToLower().Contains(searchTerm.ToLower()) ||
-                    dm.MoTa.ToLower().Contains(searchTerm.ToLower())
-                );
+                string kw = searchTerm.ToLower();
+                query = query.Where(dm =>
+                    dm.TenDanhMuc.ToLower().Contains(kw) ||
+                    dm.MoTa.ToLower().Contains(kw));
             }
 
-            if (!string.IsNullOrEmpty(trangThai) && trangThai != "Tất cả")
+            if (!string.IsNullOrEmpty(trangThai))
+                query = query.Where(dm => dm.TrangThai == trangThai);
+
+            var result = query.Select(dm => new DanhMucSachModel
             {
-                result = result.Where(dm => dm.TrangThai == trangThai);
-            }
+                MaDanhMuc = dm.MaDanhMuc,
+                TenDanhMuc = dm.TenDanhMuc,
+                MoTa = dm.MoTa,
+                TrangThai = dm.TrangThai,
+                SoLuongSach = dm.Saches.Count()
+            }).OrderBy(x => x.TenDanhMuc).ToList();
 
-            return PartialView("_DanhMucList", result.ToList());
+            return PartialView("_DanhMucList", result);
         }
 
-        // Lấy thông tin danh mục để sửa
+        // ======================= LẤY CHI TIẾT DANH MỤC =======================
         [HttpGet]
-        public ActionResult GetDanhMuc(string maDanhMuc)
+        public JsonResult GetDanhMuc(int MaDanhMuc)
         {
-            var danhMuc = _danhMucSachs.FirstOrDefault(dm => dm.MaDanhMuc == maDanhMuc);
-            if (danhMuc != null)
-            {
-                return Json(new { 
-                    success = true, 
-                    data = danhMuc 
-                }, JsonRequestBehavior.AllowGet);
-            }
-            return Json(new { success = false, message = "Không tìm thấy danh mục!" }, JsonRequestBehavior.AllowGet);
-        }
-    }
+            var dm = db.DanhMucs.Find(MaDanhMuc);
+            if (dm == null)
+                return Json(new { success = false, message = "❌ Không tìm thấy danh mục!" }, JsonRequestBehavior.AllowGet);
 
-    // Model cho danh mục sách
-    public class DanhMucSachModel
-    {
-        public string MaDanhMuc { get; set; }
-        public string TenDanhMuc { get; set; }
-        public string MoTa { get; set; }
-        public int SoLuongSach { get; set; }
-        public string TrangThai { get; set; }
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    dm.MaDanhMuc,
+                    dm.TenDanhMuc,
+                    dm.MoTa,
+                    dm.TrangThai
+                }
+            }, JsonRequestBehavior.AllowGet);
+        }
     }
 }

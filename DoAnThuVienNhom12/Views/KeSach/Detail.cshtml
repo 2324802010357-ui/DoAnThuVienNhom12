@@ -1,0 +1,140 @@
+﻿@model DoAnThuVienNhom12.Models.KeSach
+
+@{
+    ViewBag.Title = "Chi tiết kệ sách";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var sachList = ViewBag.SachTrongKe as List<DoAnThuVienNhom12.Models.Sach>;
+}
+
+<style>
+    .detail-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .header-title {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+        .header-title h3 {
+            margin: 0;
+        }
+
+    .info-row p {
+        margin: 5px 0;
+        font-size: 15px;
+    }
+
+    .capacity-bar {
+        height: 8px;
+        background: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .capacity-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #27ae60, #2ecc71);
+        transition: width 0.3s;
+    }
+
+        .capacity-bar-fill.warning {
+            background: linear-gradient(90deg, #f39c12, #e67e22);
+        }
+
+        .capacity-bar-fill.danger {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+        }
+
+    .table thead {
+        background: #f4f4f4;
+    }
+</style>
+
+<div class="animate-fade-in">
+    <div class="header-title">
+        <h3><i class="fa fa-archive"></i> Thông tin chi tiết kệ: @Model.TenKe</h3>
+    </div>
+
+    <div class="detail-card">
+        <div class="row info-row">
+            <div class="col-md-6">
+                <p><b>Mã kệ:</b> @Model.MaKe</p>
+                <p><b>Tên kệ:</b> @Model.TenKe</p>
+                <p><b>Kho chứa:</b> @(Model.Kho != null ? Model.Kho.TenKho : "Không xác định")</p>
+                <p><b>Vị trí:</b> @(string.IsNullOrEmpty(Model.ViTri) ? "Chưa xác định" : Model.ViTri)</p>
+            </div>
+            <div class="col-md-6">
+                @{
+                    var currentBooks = sachList?.Count ?? 0;
+                    var percent = Model.SucChua == 0 ? 0 : (int)(((double)currentBooks / Model.SucChua) * 100);
+                    var barClass = percent > 90 ? "danger" : percent > 75 ? "warning" : "";
+                }
+
+                <p><b>Sức chứa:</b> @Model.SucChua</p>
+                <p><b>Số lượng hiện tại:</b> @currentBooks</p>
+
+                <div class="capacity-bar">
+                    <div class="capacity-bar-fill @barClass" style="width:@percent%"></div>
+                </div>
+                <p class="text-muted">@percent% sức chứa đã được sử dụng</p>
+            </div>
+        </div>
+
+        <hr />
+
+        <h4><i class="fa fa-book"></i> Danh sách sách trong kệ</h4>
+        <br />
+
+        @if (sachList != null && sachList.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr class="active">
+                            <th style="width:5%">#</th>
+                            <th>Tên sách</th>
+                            <th>Tác giả</th>
+                            <th>Danh mục</th>
+                            <th>Nhà xuất bản</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int i = 1;
+                            foreach (var s in sachList)
+                            {
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@s.TenSach</td>
+                                    <td>@(s.TacGia != null ? s.TacGia.TenTacGia : "—")</td>
+                                    <td>@(s.DanhMuc != null ? s.DanhMuc.TenDanhMuc : "—")</td>
+                                    <td>@(s.NhaXuatBan != null ? s.NhaXuatBan.TenNXB : "—")</td>
+                                </tr>
+                                i++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-muted"><i>Không có sách nào được lưu trong kệ này.</i></p>
+        }
+
+        <div class="text-right" style="margin-top:20px;">
+            <a href="@Url.Action("Index", "KeSach")" class="btn btn-default">
+                <i class="fa fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+</div>

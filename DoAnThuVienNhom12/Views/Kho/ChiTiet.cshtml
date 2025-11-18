@@ -1,0 +1,206 @@
+﻿@model DoAnThuVienNhom12.Models.Kho
+
+@{
+    ViewBag.Title = "Chi tiết kho sách";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var keList = ViewBag.KeTrongKho as List<DoAnThuVienNhom12.Models.KeSach>;
+}
+
+<style>
+    .warehouse-detail {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .header-title {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .capacity-bar {
+        height: 8px;
+        background: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .capacity-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #27ae60, #2ecc71);
+        transition: width 0.3s;
+    }
+
+        .capacity-bar-fill.warning {
+            background: linear-gradient(90deg, #f39c12, #e67e22);
+        }
+
+        .capacity-bar-fill.danger {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+        }
+
+    table th, table td {
+        vertical-align: middle !important;
+    }
+
+    .text-muted {
+        font-style: italic;
+        color: #777;
+    }
+</style>
+
+<div class="animate-fade-in">
+    <div class="header-title">
+        <h3><i class="fa fa-warehouse"></i> Thông tin kho: @Model.TenKho</h3>
+    </div>
+
+    <div class="warehouse-detail">
+        <div class="row">
+            <div class="col-md-6">
+                <p><b>Mã kho:</b> @Model.MaKho</p>
+                <p><b>Tên kho:</b> @Model.TenKho</p>
+                <p><b>Địa chỉ:</b> @(string.IsNullOrEmpty(Model.DiaChi) ? "Chưa có" : Model.DiaChi)</p>
+                <p><b>Mô tả:</b> @(string.IsNullOrEmpty(Model.MoTa) ? "—" : Model.MoTa)</p>
+            </div>
+            <div class="col-md-6">
+                @{
+                    var totalShelf = keList?.Count ?? 0;
+                    var totalBooks = keList?.Sum(k => k.SoLuongHienTai ?? 0) ?? 0;
+                    var percent = Model.SucChua == 0 ? 0 : (int)(((double)totalBooks / Model.SucChua) * 100);
+                    var barClass = percent > 90 ? "danger" : percent > 75 ? "warning" : "";
+                }
+
+                <p><b>Sức chứa:</b> @Model.SucChua</p>
+                <p><b>Sách hiện tại:</b> @totalBooks</p>
+                <p><b>Số kệ:</b> @totalShelf</p>
+
+                <div class="capacity-bar">
+                    <div class="capacity-bar-fill @barClass" style="width:@percent%"></div>
+                </div>
+                <p class="text-muted">@percent% sức chứa đã sử dụng</p>
+            </div>
+        </div>
+
+        <hr />
+
+        <h4><i class="fa fa-th-large"></i> Danh sách kệ trong kho</h4>
+
+        <div class="text-right" style="margin-bottom:15px;">
+            <button class="btn btn-success" data-toggle="modal" data-target="#addShelfModal">
+                <i class="fa fa-plus"></i> Thêm kệ mới
+            </button>
+        </div>
+
+        @if (keList != null && keList.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr class="active">
+                            <th style="width:5%">#</th>
+                            <th style="width:20%">Tên kệ</th>
+                            <th style="width:15%">Vị trí</th>
+                            <th style="width:10%">Sức chứa</th>
+                            <th style="width:20%">Hiện tại</th>
+                            <th style="width:15%">Tình trạng</th>
+                            <th style="width:10%">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int i = 1;
+                            foreach (var ke in keList)
+                            {
+                                var hienTai = ke.SoLuongHienTai ?? 0;
+                                var percentShelf = ke.SucChua == 0 ? 0 : (int)(((double)hienTai / ke.SucChua) * 100);
+                                var barColor = percentShelf > 90 ? "danger" : percentShelf > 75 ? "warning" : "success";
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@ke.TenKe</td>
+                                    <td>@(string.IsNullOrEmpty(ke.ViTri) ? "—" : ke.ViTri)</td>
+                                    <td class="text-center">@ke.SucChua</td>
+                                    <td class="text-center">
+                                        @hienTai
+                                        <div class="progress" style="height:8px; margin-top:3px;">
+                                            <div class="progress-bar progress-bar-@barColor" style="width:@percentShelf%"></div>
+                                        </div>
+                                    </td>
+                                    <td>@(percentShelf >= 100 ? "Đầy" : percentShelf >= 75 ? "Gần đầy" : "Còn trống")</td>
+                                    <td class="text-center">
+                                        <a href="@Url.Action("ChiTiet", "KeSach", new { id = ke.MaKe })" class="btn btn-xs btn-info">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                i++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-muted"><i>Kho này chưa có kệ nào được thêm.</i></p>
+        }
+
+        <div class="text-right" style="margin-top:20px;">
+            <a href="@Url.Action("Index", "Kho")" class="btn btn-default">
+                <i class="fa fa-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL: THÊM KỆ MỚI ==================== -->
+<div class="modal fade" id="addShelfModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
+                <h4 class="modal-title"><i class="fa fa-plus"></i> Thêm kệ mới vào kho @Model.TenKho</h4>
+            </div>
+            <div class="modal-body">
+                <form id="addShelfForm">
+                    <input type="hidden" name="MaKho" value="@Model.MaKho" />
+                    <div class="form-group">
+                        <label>Tên kệ</label>
+                        <input type="text" name="TenKe" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Vị trí</label>
+                        <input type="text" name="ViTri" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Sức chứa</label>
+                        <input type="number" name="SucChua" class="form-control" min="10" value="50" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Hủy</button>
+                <button class="btn btn-primary" id="btnSaveShelf">
+                    <i class="fa fa-save"></i> Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    // === Thêm kệ mới bằng AJAX ===
+    $('#btnSaveShelf').on('click', function () {
+        var data = $('#addShelfForm').serialize();
+        $.post('@Url.Action("ThemKe", "KeSach")', data, function (res) {
+            alert(res.message);
+            if (res.success) location.reload();
+        });
+    });
+    </script>
+}

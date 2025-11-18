@@ -1,225 +1,217 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DoAnThuVienNhom12.Models;
+using System;
+using System.Data.Entity;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace DoAnThuVienNhom12.Controllers
 {
     public class SachController : Controller
     {
-        // Dữ liệu mẫu sách
-        private static List<SachModel> _sachs = new List<SachModel>
-        {
-            new SachModel { MaSach = "S001", TenSach = "Lập trình C# cơ bản", TacGia = "Nguyễn Văn A", TheLoai = "Tin học", DanhMuc = "Công nghệ", NhaXuatBan = "NXB Giáo dục", NamXuatBan = 2023, SoTrang = 350, TinhTrang = "Có sẵn", SoLuong = 10, MoTa = "Sách học lập trình C# từ cơ bản đến nâng cao" },
-            new SachModel { MaSach = "S002", TenSach = "Văn học Việt Nam", TacGia = "Trần Thị B", TheLoai = "Văn học", DanhMuc = "Văn học", NhaXuatBan = "NXB Văn học", NamXuatBan = 2022, SoTrang = 280, TinhTrang = "Có sẵn", SoLuong = 5, MoTa = "Tuyển tập văn học Việt Nam qua các thời kỳ" },
-            new SachModel { MaSach = "S003", TenSach = "Kinh tế học đại cương", TacGia = "Lê Văn C", TheLoai = "Kinh tế", DanhMuc = "Kinh tế", NhaXuatBan = "NXB Kinh tế", NamXuatBan = 2021, SoTrang = 420, TinhTrang = "Đang mượn", SoLuong = 8, MoTa = "Giáo trình kinh tế học cơ bản" },
-            new SachModel { MaSach = "S004", TenSach = "Tiếng Anh giao tiếp", TacGia = "Phạm Thị D", TheLoai = "Ngoại ngữ", DanhMuc = "Ngôn ngữ", NhaXuatBan = "NXB Đại học Quốc gia", NamXuatBan = 2023, SoTrang = 180, TinhTrang = "Có sẵn", SoLuong = 15, MoTa = "Sách học tiếng Anh giao tiếp cơ bản" },
-            new SachModel { MaSach = "S005", TenSach = "Lịch sử Việt Nam", TacGia = "Hoàng Văn E", TheLoai = "Lịch sử", DanhMuc = "Lịch sử", NhaXuatBan = "NXB Chính trị Quốc gia", NamXuatBan = 2020, SoTrang = 500, TinhTrang = "Có sẵn", SoLuong = 12, MoTa = "Lịch sử Việt Nam từ thời nguyên thủy đến hiện đại" },
-            new SachModel { MaSach = "S006", TenSach = "Khoa học máy tính", TacGia = "Võ Văn F", TheLoai = "Tin học", DanhMuc = "Công nghệ", NhaXuatBan = "NXB Khoa học", NamXuatBan = 2023, SoTrang = 380, TinhTrang = "Có sẵn", SoLuong = 7, MoTa = "Nhập môn khoa học máy tính" }
-        };
+        private DoAnThuVienNhom12Entities db = new DoAnThuVienNhom12Entities();
 
-        // Hiển thị trang chính
+        // ================== DANH SÁCH SÁCH ==================
+        [HttpGet]
         public ActionResult Index()
         {
-            ViewBag.Title = "Tìm kiếm sách";
-            return View(_sachs);
+            var list = db.Saches
+                .Include(s => s.DanhMuc)
+                .Include(s => s.TacGia)
+                .Include(s => s.NhaXuatBan)
+                .AsNoTracking()
+                .OrderByDescending(s => s.NamXuatBan)
+                .ToList();
+
+            return View(list);
         }
 
-        // Tìm kiếm sách nâng cao
-        [HttpPost]
-        public ActionResult TimKiemSach(TimKiemSachModel searchModel)
+
+        // ================== CHI TIẾT SÁCH ==================
+        [HttpGet]
+        public ActionResult Detail(int id)
         {
-            var result = _sachs.AsQueryable();
+            var sach = db.Saches
+                .Include(s => s.DanhMuc)
+                .Include(s => s.TacGia)
+                .Include(s => s.NhaXuatBan)
+                .FirstOrDefault(s => s.MaSach == id);
 
-            // Tìm kiếm theo từ khóa chính
-            if (!string.IsNullOrEmpty(searchModel.TuKhoa))
-            {
-                result = result.Where(s => 
-                    s.TenSach.ToLower().Contains(searchModel.TuKhoa.ToLower()) ||
-                    s.TacGia.ToLower().Contains(searchModel.TuKhoa.ToLower()) ||
-                    s.MoTa.ToLower().Contains(searchModel.TuKhoa.ToLower())
-                );
-            }
-
-            // Lọc theo tác giả
-            if (!string.IsNullOrEmpty(searchModel.TacGia))
-            {
-                result = result.Where(s => s.TacGia.ToLower().Contains(searchModel.TacGia.ToLower()));
-            }
-
-            // Lọc theo thể loại
-            if (!string.IsNullOrEmpty(searchModel.TheLoai))
-            {
-                result = result.Where(s => s.TheLoai.ToLower().Contains(searchModel.TheLoai.ToLower()));
-            }
-
-            // Lọc theo danh mục
-            if (!string.IsNullOrEmpty(searchModel.DanhMuc))
-            {
-                result = result.Where(s => s.DanhMuc.ToLower().Contains(searchModel.DanhMuc.ToLower()));
-            }
-
-            // Lọc theo nhà xuất bản
-            if (!string.IsNullOrEmpty(searchModel.NhaXuatBan))
-            {
-                result = result.Where(s => s.NhaXuatBan.ToLower().Contains(searchModel.NhaXuatBan.ToLower()));
-            }
-
-            // Lọc theo năm xuất bản
-            if (searchModel.NamTu.HasValue)
-            {
-                result = result.Where(s => s.NamXuatBan >= searchModel.NamTu.Value);
-            }
-
-            if (searchModel.NamDen.HasValue)
-            {
-                result = result.Where(s => s.NamXuatBan <= searchModel.NamDen.Value);
-            }
-
-            // Lọc theo tình trạng
-            if (!string.IsNullOrEmpty(searchModel.TinhTrang) && searchModel.TinhTrang != "Tất cả")
-            {
-                result = result.Where(s => s.TinhTrang == searchModel.TinhTrang);
-            }
-
-            return PartialView("_BookList", result.ToList());
-        }
-
-        // Tìm kiếm đơn giản từ trang chủ
-        public ActionResult Search(string q)
-        {
-            ViewBag.Title = "Kết quả tìm kiếm";
-            ViewBag.Query = q;
-            
-            var result = _sachs.AsQueryable();
-            
-            if (!string.IsNullOrEmpty(q))
-            {
-                result = result.Where(s => 
-                    s.TenSach.ToLower().Contains(q.ToLower()) ||
-                    s.TacGia.ToLower().Contains(q.ToLower()) ||
-                    s.TheLoai.ToLower().Contains(q.ToLower())
-                );
-            }
-            
-            return View(result.ToList());
-        }
-
-        // Chi tiết sách
-        public ActionResult Detail(string id)
-        {
-            var sach = _sachs.FirstOrDefault(s => s.MaSach == id);
             if (sach == null)
-            {
                 return HttpNotFound();
-            }
-            
-            ViewBag.Title = sach.TenSach;
-            ViewBag.Id = id;
+
             return View(sach);
         }
 
-        // GET: Chỉnh sửa sách
-        public ActionResult Edit(string id)
+        // ================== CHỈNH SỬA SÁCH ==================
+        [HttpGet]
+        public ActionResult Edit(int id)
         {
-            // Nếu không có id, lấy sách đầu tiên để demo
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "S001";
-            }
-            
-            var sach = _sachs.FirstOrDefault(s => s.MaSach == id);
+            var sach = db.Saches.Find(id);
             if (sach == null)
-            {
                 return HttpNotFound();
-            }
-            
-            ViewBag.Title = "Cập nhật: " + sach.TenSach;
-            ViewBag.Id = id;
+
+            LoadDropdowns(sach);
             return View(sach);
         }
 
-        // POST: Lưu chỉnh sửa sách
         [HttpPost]
-        public ActionResult Edit(SachModel model)
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(Sach sach)
         {
             if (ModelState.IsValid)
             {
-                var sach = _sachs.FirstOrDefault(s => s.MaSach == model.MaSach);
-                if (sach != null)
-                {
-                    // Cập nhật thông tin
-                    sach.TenSach = model.TenSach;
-                    sach.TacGia = model.TacGia;
-                    sach.TheLoai = model.TheLoai;
-                    sach.DanhMuc = model.DanhMuc;
-                    sach.NhaXuatBan = model.NhaXuatBan;
-                    sach.NamXuatBan = model.NamXuatBan;
-                    sach.SoTrang = model.SoTrang;
-                    sach.TinhTrang = model.TinhTrang;
-                    sach.SoLuong = model.SoLuong;
-                    sach.MoTa = model.MoTa;
-                    
-                    TempData["SuccessMessage"] = "Cập nhật sách thành công!";
-                    return RedirectToAction("Detail", new { id = model.MaSach });
-                }
+                var oldBook = db.Saches.Find(sach.MaSach);
+                if (oldBook == null)
+                    return HttpNotFound();
+
+                // ✅ Chỉ cập nhật phần người dùng thực sự thay đổi
+                if (!string.IsNullOrWhiteSpace(sach.TenSach))
+                    oldBook.TenSach = sach.TenSach;
+
+                if (sach.MaDanhMuc > 0)
+                    oldBook.MaDanhMuc = sach.MaDanhMuc;
+
+                if (sach.MaTacGia > 0)
+                    oldBook.MaTacGia = sach.MaTacGia;
+
+                if (sach.MaNXB > 0)
+                    oldBook.MaNXB = sach.MaNXB;
+
+                if (sach.MaKe > 0)
+                    oldBook.MaKe = sach.MaKe;
+
+                if (sach.NamXuatBan > 0)
+                    oldBook.NamXuatBan = sach.NamXuatBan;
+
+                if (sach.SoTrang > 0)
+                    oldBook.SoTrang = sach.SoTrang;
+
+                if (!string.IsNullOrWhiteSpace(sach.NgonNgu))
+                    oldBook.NgonNgu = sach.NgonNgu;
+
+                if (sach.GiaNhap > 0)
+                    oldBook.GiaNhap = sach.GiaNhap;
+
+                if (sach.GiaBia > 0)
+                    oldBook.GiaBia = sach.GiaBia;
+
+                if (sach.SoLuong > 0)
+                    oldBook.SoLuong = sach.SoLuong;
+
+                if (sach.SoLuongCoSan > 0)
+                    oldBook.SoLuongCoSan = sach.SoLuongCoSan;
+
+                if (!string.IsNullOrWhiteSpace(sach.TinhTrang))
+                    oldBook.TinhTrang = sach.TinhTrang;
+
+                if (!string.IsNullOrWhiteSpace(sach.MoTa))
+                    oldBook.MoTa = sach.MoTa;
+
+                if (!string.IsNullOrWhiteSpace(sach.TuKhoa))
+                    oldBook.TuKhoa = sach.TuKhoa;
+
+                if (!string.IsNullOrWhiteSpace(sach.AnhBia))
+                    oldBook.AnhBia = sach.AnhBia.Trim();
+
+                oldBook.NgayCapNhat = DateTime.Now;
+
+                db.SaveChanges();
+                TempData["Success"] = "✅ Cập nhật thành công!";
+                return RedirectToAction("Index");
             }
-            
+
+            LoadDropdowns(sach);
+            return View(sach);
+        }
+
+        // ================== XÓA SÁCH ==================
+        [HttpGet]
+        public ActionResult Delete(int id)
+        {
+            var sach = db.Saches
+                .Include(s => s.DanhMuc)
+                .Include(s => s.TacGia)
+                .Include(s => s.NhaXuatBan)
+                .AsNoTracking()
+                .FirstOrDefault(s => s.MaSach == id);
+
+            if (sach == null)
+                return HttpNotFound();
+
+            return View(sach);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteConfirmed(int id)
+        {
+            var sach = db.Saches.Find(id);
+            if (sach == null)
+                return HttpNotFound();
+
+            db.Saches.Remove(sach);
+            db.SaveChanges();
+            TempData["Success"] = "🗑️ Xóa thành công!";
+            return RedirectToAction("Index");
+        }
+
+
+        // ================== LOAD DROPDOWN ==================
+        private void LoadDropdowns(Sach sach = null)
+        {
+            ViewBag.MaDanhMuc = new SelectList(db.DanhMucs.ToList(), "MaDanhMuc", "TenDanhMuc", sach?.MaDanhMuc);
+            ViewBag.MaTacGia = new SelectList(db.TacGias.ToList(), "MaTacGia", "TenTacGia", sach?.MaTacGia);
+            ViewBag.MaNXB = new SelectList(db.NhaXuatBans.ToList(), "MaNXB", "TenNXB", sach?.MaNXB);
+            ViewBag.MaKe = new SelectList(db.KeSaches.ToList(), "MaKe", "TenKe", sach?.MaKe);
+        }
+
+        // ================== DỌN DẸP ==================
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                db.Dispose();
+            base.Dispose(disposing);
+        }
+        [HttpGet]
+        public ActionResult Create()
+        {
+            ViewBag.MaDanhMuc = new SelectList(db.DanhMucs, "MaDanhMuc", "TenDanhMuc");
+            ViewBag.MaTacGia = new SelectList(db.TacGias, "MaTacGia", "TenTacGia");
+            ViewBag.MaNXB = new SelectList(db.NhaXuatBans, "MaNXB", "TenNXB");
+            ViewBag.MaKe = new SelectList(db.KeSaches, "MaKe", "TenKe");
+
+            return View();
+        }
+
+        // ============================
+        // CREATE (POST)
+        // ============================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(Sach model)
+        {
+            if (ModelState.IsValid)
+            {
+                model.SoLuongCoSan = model.SoLuong;       // số lượng đầu vào
+                model.NgayNhap = System.DateTime.Now;
+                model.NgayCapNhat = System.DateTime.Now;
+                model.TinhTrang = "Còn hàng";
+
+                db.Saches.Add(model);
+                db.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
+
+            // Load lại dropdown nếu có lỗi
+            ViewBag.MaDanhMuc = new SelectList(db.DanhMucs, "MaDanhMuc", "TenDanhMuc", model.MaDanhMuc);
+            ViewBag.MaTacGia = new SelectList(db.TacGias, "MaTacGia", "TenTacGia", model.MaTacGia);
+            ViewBag.MaNXB = new SelectList(db.NhaXuatBans, "MaNXB", "TenNXB", model.MaNXB);
+            ViewBag.MaKe = new SelectList(db.KeSaches, "MaKe", "TenKe", model.MaKe);
+
             return View(model);
         }
-
-        // Lấy danh sách thể loại
-        [HttpGet]
-        public ActionResult GetTheLoai()
-        {
-            var theLoai = _sachs.Select(s => s.TheLoai).Distinct().ToList();
-            return Json(theLoai, JsonRequestBehavior.AllowGet);
-        }
-
-        // Lấy danh sách tác giả
-        [HttpGet]
-        public ActionResult GetTacGia()
-        {
-            var tacGia = _sachs.Select(s => s.TacGia).Distinct().ToList();
-            return Json(tacGia, JsonRequestBehavior.AllowGet);
-        }
-
-        // Lấy danh sách nhà xuất bản
-        [HttpGet]
-        public ActionResult GetNhaXuatBan()
-        {
-            var nxb = _sachs.Select(s => s.NhaXuatBan).Distinct().ToList();
-            return Json(nxb, JsonRequestBehavior.AllowGet);
-        }
-    }
-
-    // Model cho sách
-    public class SachModel
-    {
-        public string MaSach { get; set; }
-        public string TenSach { get; set; }
-        public string TacGia { get; set; }
-        public string TheLoai { get; set; }
-        public string DanhMuc { get; set; }
-        public string NhaXuatBan { get; set; }
-        public int NamXuatBan { get; set; }
-        public int SoTrang { get; set; }
-        public string TinhTrang { get; set; }
-        public int SoLuong { get; set; }
-        public string MoTa { get; set; }
-    }
-
-    // Model cho tìm kiếm
-    public class TimKiemSachModel
-    {
-        public string TuKhoa { get; set; }
-        public string TacGia { get; set; }
-        public string TheLoai { get; set; }
-        public string DanhMuc { get; set; }
-        public string NhaXuatBan { get; set; }
-        public int? NamTu { get; set; }
-        public int? NamDen { get; set; }
-        public string TinhTrang { get; set; }
     }
 }
+    
+

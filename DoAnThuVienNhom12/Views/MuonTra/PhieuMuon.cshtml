@@ -1,339 +1,291 @@
 ﻿@{
-    ViewBag.Title = "Phiếu mượn";
+    ViewBag.Title = "Tạo Phiếu Mượn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <style>
     .ui-autocomplete {
-        z-index: 3000
+        z-index: 3000 !important;
     }
 
-    .table > tbody > tr > td {
-        vertical-align: middle
+    .table td {
+        vertical-align: middle;
     }
 
-    .badge-soft {
-        background: #eef2ff;
-        color: #1f2a56;
-        border: 1px solid #cdd5ff
-    }
-
-    .total-box {
-        background: #f8fafc;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        padding: 8px 10px
-    }
-
-    hr.dashed {
-        border-top: 1px dashed #e5e7eb
-    }
-
-    .item-actions .btn {
-        padding: 3px 8px
-    }
-
-    .text-muted-small {
-        color: #778;
-        font-size: 12px
-    }
-
-    .student-info-section {
+    .info-box {
         background: #f9f9f9;
-        border: 1px solid #e0e0e0;
         border-radius: 8px;
+        border: 1px solid #ddd;
         padding: 15px;
-        margin-bottom: 15px;
-    }
-
-    .student-info-section h5 {
-        margin-top: 0;
-        color: #333;
-        font-weight: bold;
+        margin-bottom: 10px;
     }
 </style>
 
-<div class="row" style="margin-top:10px;">
-    <div class="col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <strong><i class="glyphicon glyphicon-list-alt"></i> Phiếu mượn</strong>
+<div class="panel panel-default" style="margin-top:15px;">
+    <div class="panel-heading"><strong><i class="glyphicon glyphicon-book"></i> Phiếu mượn</strong></div>
+    <div class="panel-body">
+
+        <!-- THÔNG TIN SINH VIÊN -->
+        <div class="info-box">
+            <h5><i class="glyphicon glyphicon-user"></i> Thông tin sinh viên</h5>
+
+            <div class="form-horizontal">
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Tên sinh viên:</label>
+                    <div class="col-sm-9">
+                        <input id="pmStudentName" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Mã sinh viên:</label>
+                    <div class="col-sm-4">
+                        <input id="pmStudentId" class="form-control">
+                    </div>
+
+                    <label class="col-sm-2 control-label">Mã lớp:</label>
+                    <div class="col-sm-3">
+                        <input id="pmClassId" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Ngày mượn:</label>
+                    <div class="col-sm-4">
+                        <input id="pmBorrowDate" type="date" class="form-control">
+                    </div>
+
+                    <label class="col-sm-2 control-label">Hạn trả:</label>
+                    <div class="col-sm-3">
+                        <input id="pmDueDate" type="date" class="form-control">
+                    </div>
+                </div>
+
             </div>
-            <div class="panel-body">
-                <div class="student-info-section">
-                    <h5><i class="glyphicon glyphicon-user"></i> Thông tin sinh viên</h5>
-                    <div class="form-horizontal">
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Tên sinh viên:</label>
-                            <div class="col-sm-9">
-                                <input id="brStudentName" class="form-control" placeholder="Nhập tên sinh viên..." autocomplete="off">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label">Mã số sinh viên:</label>
-                            <div class="col-sm-4">
-                                <input id="brStudentId" class="form-control" placeholder="Ví dụ: 2324802010357" autocomplete="off">
-                            </div>
-                            <label class="col-sm-2 control-label">Mã lớp:</label>
-                            <div class="col-sm-3">
-                                <input id="brClassId" class="form-control" placeholder="Ví dụ: DH23TT01" autocomplete="off">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        </div>
 
-                <div class="form-horizontal">
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Ngày mượn:</label>
-                        <div class="col-sm-3">
-                            <input id="brBorrowDate" type="date" class="form-control">
-                        </div>
-                        <label class="col-sm-2 control-label">Hạn trả:</label>
-                        <div class="col-sm-3">
-                            <input id="brDueDate" type="date" class="form-control">
-                        </div>
-                    </div>
-                </div>
+        <hr />
 
-                <hr class="dashed">
+        <!-- DANH SÁCH SÁCH -->
+        <h5><i class="glyphicon glyphicon-list-alt"></i> Danh sách sách mượn</h5>
 
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="tblBorrow">
-                        <thead>
-                            <tr class="active">
-                                <th style="width:50px">STT</th>
-                                <th style="width:110px">Mã sách</th>
-                                <th>Tên sách</th>
-                                <th style="width:140px">Tác giả</th>
-                                <th style="width:140px">Nhà xuất bản</th>
-                                <th style="width:80px"></th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div class="text-right">
-                    <button id="btnAddRowBorrow" type="button" class="btn btn-default">
-                        <i class="glyphicon glyphicon-plus"></i> Thêm sách
-                    </button>
-                </div>
+        <table class="table table-bordered" id="tblBorrow">
+            <thead>
+                <tr class="active">
+                    <th style="width:40px;">STT</th>
+                    <th style="width:100px;">Mã sách</th>
+                    <th>Tên sách</th>
+                    <th style="width:160px;">Tác giả</th>
+                    <th style="width:160px;">NXB</th>
+                    <th style="width:60px;">Xóa</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
 
-                <div class="row" style="margin-top:10px">
-                    <div class="col-sm-6 text-muted-small">
-                        <span class="badge badge-soft">Quy định mượn sách</span>
-                        <ul style="margin-top:8px">
-                            <li>Mỗi phiếu tối đa <strong id="ruleMaxItems">5</strong> cuốn sách.</li>
-                            <li>Thời hạn mượn mặc định <strong id="ruleDays">14</strong> ngày.</li>
-                            <li>Sinh viên phải có thẻ sinh viên hợp lệ.</li>
-                        </ul>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="total-box">
-                            <div>Số đầu sách: <strong id="brItemsCount">0</strong></div>
-                            <div>Tổng số sách: <strong id="brTotalBooks">0</strong></div>
-                        </div>
-                    </div>
-                </div>
+        <button id="addBook" class="btn btn-sm btn-success">
+            <i class="glyphicon glyphicon-plus"></i> Thêm sách
+        </button>
 
-                <div class="text-right" style="margin-top:12px">
-                    <button class="btn btn-default" type="button" id="brDraft"><i class="glyphicon glyphicon-floppy-disk"></i> Lưu tạm</button>
-                    <button class="btn btn-default" type="button" id="brPrint"><i class="glyphicon glyphicon-print"></i> In phiếu</button>
-                    <button class="btn btn-primary" type="button" id="brSubmit"><i class="glyphicon glyphicon-ok"></i> Xác nhận mượn</button>
-                </div>
-            </div>
+        <div class="text-right" style="margin-top:15px;">
+            <button id="btnPrint" class="btn btn-default">
+                <i class="glyphicon glyphicon-print"></i> In phiếu
+            </button>
+
+            <button id="btnSave" class="btn btn-primary">
+                <i class="glyphicon glyphicon-ok"></i> Xác nhận mượn
+            </button>
         </div>
     </div>
 </div>
 
-<script>
-(function(){
-  /* DỮ LIỆU DEMO */
-  var STUDENTS=[
-    {id:'2324802010357', name:'Nguyễn Văn Anh', classId:'DH23TT01'},
-    {id:'2324802010358', name:'Trần Thị Bình', classId:'DH23TT02'},
-    {id:'2324802010359', name:'Phạm Minh Cường', classId:'DH23TT01'},
-    {id:'2324802010360', name:'Lê Thị Dung', classId:'DH23TT03'}
-  ];
-  
-  var BOOKS=[
-    {code:'S001', title:'Lập trình C# nâng cao', author:'Kazami Yuki', publisher:'NXB Giáo dục'},
-    {code:'S002', title:'Cấu trúc dữ liệu & Giải thuật', author:'Nguyễn Đức Nghĩa', publisher:'NXB Đại học Quốc gia'},
-    {code:'S003', title:'Toán cao cấp A1', author:'Nguyễn Nhật Ánh', publisher:'NXB Khoa học & Kỹ thuật'},
-    {code:'S004', title:'Thuật toán ứng dụng', author:'Haruki Murakami', publisher:'NXB Thông tin & Truyền thông'},
-    {code:'S005', title:'Cơ sở dữ liệu', author:'Trần Văn A', publisher:'NXB Giáo dục'},
-    {code:'S006', title:'Mạng máy tính', author:'Lê Thị B', publisher:'NXB Đại học Quốc gia'}
-  ];
-  
-  var RULE_MAX_ITEMS=5, RULE_DAYS=14;
-  $('#ruleMaxItems').text(RULE_MAX_ITEMS); 
-  $('#ruleDays').text(RULE_DAYS);
 
-  function todayStr(){return new Date().toISOString().slice(0,10);}
-  function addDaysStr(d,days){var x=new Date(d);x.setDate(x.getDate()+days);return x.toISOString().slice(0,10);}
-  $('#brBorrowDate').val(todayStr());
-  $('#brDueDate').val(addDaysStr($('#brBorrowDate').val(),RULE_DAYS));
-  $('#brBorrowDate').on('change',function(){ $('#brDueDate').val(addDaysStr(this.value||todayStr(),RULE_DAYS)); });
+@section Scripts {
+    <script>
+$(function () {
 
-  /* Autocomplete cho sinh viên */
-  $('#brStudentName').autocomplete({
-    minLength:0,
-    source: STUDENTS.map(s=>({label:s.name+' ('+s.id+')',value:s.name,data:s})),
-    select: function(e,ui){ 
-      $(this).val(ui.item.value);
-      $('#brStudentId').val(ui.item.data.id);
-      $('#brClassId').val(ui.item.data.classId);
-      return false; 
-    }
-  }).on('focus', function(){ $(this).autocomplete('search', this.value); });
+    // === AUTO SET DATE ===
+    const today = new Date();
+    $("#pmBorrowDate").val(today.toISOString().split("T")[0]);
 
-  $('#brStudentId').autocomplete({
-    minLength:0,
-    source: STUDENTS.map(s=>({label:s.id+' - '+s.name,value:s.id,data:s})),
-    select: function(e,ui){ 
-      $(this).val(ui.item.value);
-      $('#brStudentName').val(ui.item.data.name);
-      $('#brClassId').val(ui.item.data.classId);
-      return false; 
-    }
-  }).on('focus', function(){ $(this).autocomplete('search', this.value); });
+    const due = new Date(today);
+    due.setDate(today.getDate() + 14);
+    $("#pmDueDate").val(due.toISOString().split("T")[0]);
 
-  function attachBook($code,$title,$author,$publisher){
-    var srcByCode=BOOKS.map(b=>({label:b.code+' • '+b.title,value:b.code,data:b}));
-    var srcByTitle=BOOKS.map(b=>({label:b.title+' - '+b.author,value:b.title,data:b}));
-    
-    $code.autocomplete({
-      minLength:0,
-      source:srcByCode,
-      select:function(e,ui){
-        var b=ui.item.data;
-        $code.val(b.code);
-        $title.val(b.title);
-        $author.val(b.author);
-        $publisher.val(b.publisher);
-        return false;
-      }
-    }).on('focus',function(){ $(this).autocomplete('search',this.value); });
-    
-    $title.autocomplete({
-      minLength:0,
-      source:srcByTitle,
-      select:function(e,ui){
-        var b=ui.item.data;
-        $code.val(b.code);
-        $title.val(b.title);
-        $author.val(b.author);
-        $publisher.val(b.publisher);
-        return false;
-      }
-    }).on('focus',function(){ $(this).autocomplete('search',this.value); });
-  }
 
-  /* Bảng mượn */
-  function addBorrowRow(){
-    var rowNum = $('#tblBorrow tbody tr').length + 1;
-    var tr=$('<tr/>');
-    var tdStt=$('<td class="text-center"/>').append('<strong>'+rowNum+'</strong>');
-    var tdCode=$('<td/>').append('<input class="form-control input-code" placeholder="Chọn mã..." autocomplete="off">');
-    var tdTitle=$('<td/>').append('<input class="form-control input-title" placeholder="Tên sách..." autocomplete="off">');
-    var tdAuthor=$('<td/>').append('<input class="form-control input-author" placeholder="Tác giả" autocomplete="off">');
-    var tdPublisher=$('<td/>').append('<input class="form-control input-publisher" placeholder="Nhà xuất bản" autocomplete="off">');
-    var tdAct=$('<td class="text-center"/>').append('<button type="button" class="btn btn-danger btn-xs remove-row"><i class="glyphicon glyphicon-trash"></i></button>');
-    
-    tr.append(tdStt,tdCode,tdTitle,tdAuthor,tdPublisher,tdAct); 
-    $('#tblBorrow tbody').append(tr);
-    
-    attachBook(
-      tdCode.find('input'),
-      tdTitle.find('input'),
-      tdAuthor.find('input'),
-      tdPublisher.find('input')
-    );
-    
-    updateCount();
-    updateRowNumbers();
-  }
+    // === ADD BOOK ROW ===
+    $("#addBook").click(function () {
+        const idx = $("#tblBorrow tbody tr").length + 1;
 
-  function updateRowNumbers(){
-    $('#tblBorrow tbody tr').each(function(index){
-      $(this).find('td:first strong').text(index + 1);
+        const tr = $(`
+            <tr>
+                <td class="text-center">${idx}</td>
+                <td><input class="form-control code" type="number" min="1"></td>
+                <td><input class="form-control title" readonly></td>
+                <td><input class="form-control author" readonly></td>
+                <td><input class="form-control publisher" readonly></td>
+                <td class="text-center">
+                    <button class="btn btn-danger btn-sm del"><i class="glyphicon glyphicon-trash"></i></button>
+                </td>
+            </tr>`);
+
+        $("#tblBorrow tbody").append(tr);
     });
-  }
 
-  function updateCount(){ 
-    var rowCount = $('#tblBorrow tbody tr').length;
-    $('#brItemsCount').text(rowCount);
-    $('#brTotalBooks').text(rowCount); // Assuming 1 book per row, can be modified later
-  }
-
-  $('#btnAddRowBorrow').on('click',function(){
-    if($('#tblBorrow tbody tr').length>=RULE_MAX_ITEMS){ 
-      alert('Tối đa '+RULE_MAX_ITEMS+' đầu sách trong một phiếu mượn.'); 
-      return; 
-    }
-    addBorrowRow();
-  });
-
-  $('#tblBorrow').on('click','.remove-row',function(){ 
-    $(this).closest('tr').remove(); 
-    updateCount();
-    updateRowNumbers();
-  });
-
-  // Khởi tạo với 1 hàng
-  addBorrowRow();
-
-  // Validation function
-  function validateForm(){
-    if(!$('#brStudentName').val().trim()){
-      alert('Vui lòng nhập tên sinh viên');
-      $('#brStudentName').focus();
-      return false;
-    }
-    if(!$('#brStudentId').val().trim()){
-      alert('Vui lòng nhập mã số sinh viên');
-      $('#brStudentId').focus();
-      return false;
-    }
-    if(!$('#brClassId').val().trim()){
-      alert('Vui lòng nhập mã lớp');
-      $('#brClassId').focus();
-      return false;
-    }
-    if($('#tblBorrow tbody tr').length === 0){
-      alert('Vui lòng thêm ít nhất một cuốn sách');
-      return false;
-    }
-    
-    // Check if all book rows have required data
-    var isValid = true;
-    $('#tblBorrow tbody tr').each(function(){
-      var code = $(this).find('.input-code').val().trim();
-      var title = $(this).find('.input-title').val().trim();
-      if(!code || !title){
-        alert('Vui lòng điền đầy đủ thông tin sách');
-        isValid = false;
-        return false;
-      }
+    // === DELETE ROW ===
+    $("#tblBorrow").on("click", ".del", function () {
+        $(this).closest("tr").remove();
+        updateIndex();
     });
-    
-    return isValid;
-  }
 
-  // Demo actions
-  $('#brDraft').on('click', function(){
-    if(validateForm()){
-      alert('Lưu phiếu mượn tạm thành công!');
+    function updateIndex() {
+        $("#tblBorrow tbody tr").each(function (i) {
+            $(this).find("td:first").text(i + 1);
+        });
     }
-  });
 
-  $('#brPrint').on('click', function(){
-    if(validateForm()){
-      window.print();
-    }
-  });
+    // === LOAD BOOK INFO ===
+    $("#tblBorrow").on("change", ".code", function () {
+        const code = $(this).val().trim();
+        const row = $(this).closest("tr");
+        if (!code) return;
 
-  $('#brSubmit').on('click', function(){
-    if(validateForm()){
-      alert('Xác nhận phiếu mượn thành công!\nSinh viên: ' + $('#brStudentName').val() + '\nMSSV: ' + $('#brStudentId').val() + '\nLớp: ' + $('#brClassId').val());
-    }
-  });
-})();
-</script>
+        $.ajax({
+            url: '@Url.Action("LayThongTinSach","MuonTra")',
+            type: "GET",
+            data: { maSach: code },
+            success: function (data) {
+
+                if (!data || data.success === false) {
+                    alert("❌ Không tìm thấy sách!");
+                    row.find(".title, .author, .publisher").val("");
+                    return;
+                }
+
+                row.find(".title").val(data.title);
+                row.find(".author").val(data.author);
+                row.find(".publisher").val(data.publisher);
+            },
+            error: function () {
+                alert("❌ Lỗi API! Kiểm tra Controller.");
+            }
+        });
+
+    });
+
+
+    // ============================
+    // 💾 SAVE PHIẾU MƯỢN
+    // ============================
+    $("#btnSave").click(function () {
+
+        const books = [];
+        $("#tblBorrow tbody tr").each(function () {
+            const code = $(this).find(".code").val();
+            if (code) books.push(code);
+        });
+
+        const payload = {
+            studentName: $("#pmStudentName").val(),
+            studentId: $("#pmStudentId").val(),
+            classId: $("#pmClassId").val(),
+            borrowDate: $("#pmBorrowDate").val(),
+            dueDate: $("#pmDueDate").val(),
+            books: books
+        };
+
+        if (!payload.studentName || !payload.studentId || !payload.classId) {
+            alert("⚠ Nhập đầy đủ thông tin sinh viên!");
+            return;
+        }
+
+        if (books.length === 0) {
+            alert("⚠ Chưa chọn sách!");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("SavePhieuMuon","MuonTra")',
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(payload),
+            success: function (res) {
+                alert(res.message);
+                if (res.success)
+                    window.location.href = '@Url.Action("Index","MuonTra")';
+            },
+            error: function () { alert("❌ Lỗi lưu phiếu mượn!"); }
+        });
+    });
+
+
+
+    // ============================
+    // 🖨 IN PHIẾU MƯỢN (ĐÃ FIX FULL)
+    // ============================
+    $("#btnPrint").click(function () {
+
+        let win = window.open("", "_blank", "width=900,height=700");
+
+        let html = `
+            <html>
+            <head>
+                <title>PHIẾU MƯỢN SÁCH</title>
+                <style>
+                    body { font-family: Arial; padding: 20px; }
+                    h2 { text-align: center; margin-bottom: 20px; }
+                    table { width:100%; border-collapse: collapse; margin-top:10px; }
+                    table, th, td { border:1px solid #000; }
+                    th, td { padding:7px; text-align:left; }
+                </style>
+            </head>
+
+            <body>
+                <h2>PHIẾU MƯỢN SÁCH</h2>
+
+                <p><strong>Họ tên:</strong> ${$("#pmStudentName").val()}</p>
+                <p><strong>MSSV:</strong> ${$("#pmStudentId").val()}</p>
+                <p><strong>Lớp:</strong> ${$("#pmClassId").val()}</p>
+                <p><strong>Ngày mượn:</strong> ${$("#pmBorrowDate").val()}</p>
+                <p><strong>Hạn trả:</strong> ${$("#pmDueDate").val()}</p>
+
+                <h4>Danh sách sách mượn:</h4>
+
+                <table>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã sách</th>
+                        <th>Tên sách</th>
+                        <th>Tác giả</th>
+                        <th>NXB</th>
+                    </tr>
+        `;
+
+        $("#tblBorrow tbody tr").each(function (i) {
+            html += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${$(this).find(".code").val()}</td>
+                    <td>${$(this).find(".title").val()}</td>
+                    <td>${$(this).find(".author").val()}</td>
+                    <td>${$(this).find(".publisher").val()}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                </table>
+            </body>
+            </html>
+        `;
+
+        win.document.write(html);
+        win.document.close();
+        win.print();
+    });
+
+});
+    </script>
+}
+

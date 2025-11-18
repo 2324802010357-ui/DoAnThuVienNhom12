@@ -379,6 +379,23 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Function Name="sp_MuonSach" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="MaDocGia" Type="int" Mode="In" />
+          <Parameter Name="MaNhanVien" Type="int" Mode="In" />
+          <Parameter Name="MaSach" Type="int" Mode="In" />
+          <Parameter Name="SoLuong" Type="int" Mode="In" />
+          <Parameter Name="NgayHenTra" Type="datetime" Mode="In" />
+        </Function>
+        <Function Name="sp_TimKiemSach" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="TuKhoa" Type="nvarchar" Mode="In" />
+          <Parameter Name="MaDanhMuc" Type="int" Mode="In" />
+          <Parameter Name="MaTacGia" Type="int" Mode="In" />
+        </Function>
+        <Function Name="sp_TraSach" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="MaPhieuMuon" Type="int" Mode="In" />
+          <Parameter Name="TinhTrangSach" Type="nvarchar" Mode="In" />
+          <Parameter Name="TienPhat" Type="decimal" Mode="In" />
+        </Function>
         <EntityContainer Name="DoAnThuVienNhom12ModelStoreContainer">
           <EntitySet Name="ChiTietPhieuMuon" EntityType="Self.ChiTietPhieuMuon" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ChiTietPhieuNhap" EntityType="Self.ChiTietPhieuNhap" Schema="dbo" store:Type="Tables" />
@@ -859,7 +876,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="DoAnThuVienNhom12Entity" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="DoAnThuVienNhom12Entities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="ChiTietPhieuMuons" EntityType="Self.ChiTietPhieuMuon" />
           <EntitySet Name="ChiTietPhieuNhaps" EntityType="Self.ChiTietPhieuNhap" />
           <EntitySet Name="DanhMucs" EntityType="Self.DanhMuc" />
@@ -931,13 +948,62 @@
             <End Role="TacGia" EntitySet="TacGias" />
             <End Role="Sach" EntitySet="Saches" />
           </AssociationSet>
+          <FunctionImport Name="sp_MuonSach" ReturnType="Collection(DoAnThuVienNhom12Model.sp_MuonSach_Result)">
+            <Parameter Name="MaDocGia" Mode="In" Type="Int32" />
+            <Parameter Name="MaNhanVien" Mode="In" Type="Int32" />
+            <Parameter Name="MaSach" Mode="In" Type="Int32" />
+            <Parameter Name="SoLuong" Mode="In" Type="Int32" />
+            <Parameter Name="NgayHenTra" Mode="In" Type="DateTime" />
+          </FunctionImport>
+          <FunctionImport Name="sp_TimKiemSach" ReturnType="Collection(DoAnThuVienNhom12Model.sp_TimKiemSach_Result)">
+            <Parameter Name="TuKhoa" Mode="In" Type="String" />
+            <Parameter Name="MaDanhMuc" Mode="In" Type="Int32" />
+            <Parameter Name="MaTacGia" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="sp_TraSach" ReturnType="Collection(Int32)">
+            <Parameter Name="MaPhieuMuon" Mode="In" Type="Int32" />
+            <Parameter Name="TinhTrangSach" Mode="In" Type="String" />
+            <Parameter Name="TienPhat" Mode="In" Type="Decimal" />
+          </FunctionImport>
         </EntityContainer>
+        <ComplexType Name="sp_MuonSach_Result">
+          <Property Type="Int32" Name="MaPhieuMuon" Nullable="true" />
+          <Property Type="Int32" Name="Success" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="sp_TimKiemSach_Result">
+          <Property Type="Int32" Name="MaSach" Nullable="false" />
+          <Property Type="String" Name="TenSach" Nullable="false" MaxLength="255" />
+          <Property Type="Int32" Name="MaDanhMuc" Nullable="true" />
+          <Property Type="Int32" Name="MaTacGia" Nullable="true" />
+          <Property Type="Int32" Name="MaNXB" Nullable="true" />
+          <Property Type="Int32" Name="NamXuatBan" Nullable="true" />
+          <Property Type="Int32" Name="SoTrang" Nullable="true" />
+          <Property Type="String" Name="NgonNgu" Nullable="true" MaxLength="50" />
+          <Property Type="Decimal" Name="GiaNhap" Nullable="true" Precision="18" Scale="2" />
+          <Property Type="Decimal" Name="GiaBia" Nullable="true" Precision="18" Scale="2" />
+          <Property Type="String" Name="MoTa" Nullable="true" />
+          <Property Type="String" Name="TuKhoa" Nullable="true" MaxLength="500" />
+          <Property Type="String" Name="AnhBia" Nullable="true" MaxLength="500" />
+          <Property Type="Int32" Name="MaKe" Nullable="true" />
+          <Property Type="Int32" Name="SoLuong" Nullable="true" />
+          <Property Type="Int32" Name="SoLuongCoSan" Nullable="true" />
+          <Property Type="Int32" Name="LuotMuon" Nullable="true" />
+          <Property Type="Int32" Name="LuotXem" Nullable="true" />
+          <Property Type="String" Name="TinhTrang" Nullable="true" MaxLength="50" />
+          <Property Type="DateTime" Name="NgayNhap" Nullable="true" Precision="23" />
+          <Property Type="DateTime" Name="NgayCapNhat" Nullable="true" Precision="23" />
+          <Property Type="String" Name="TenDanhMuc" Nullable="true" MaxLength="100" />
+          <Property Type="String" Name="TenTacGia" Nullable="true" MaxLength="100" />
+          <Property Type="String" Name="TenNXB" Nullable="true" MaxLength="200" />
+          <Property Type="String" Name="TenKe" Nullable="true" MaxLength="50" />
+          <Property Type="String" Name="TenKho" Nullable="true" MaxLength="100" />
+        </ComplexType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="DoAnThuVienNhom12ModelStoreContainer" CdmEntityContainer="DoAnThuVienNhom12Entity">
+        <EntityContainerMapping StorageEntityContainer="DoAnThuVienNhom12ModelStoreContainer" CdmEntityContainer="DoAnThuVienNhom12Entities">
           <EntitySetMapping Name="ChiTietPhieuMuons">
             <EntityTypeMapping TypeName="DoAnThuVienNhom12Model.ChiTietPhieuMuon">
               <MappingFragment StoreEntitySet="ChiTietPhieuMuon">
@@ -1159,6 +1225,47 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="sp_MuonSach" FunctionName="DoAnThuVienNhom12Model.Store.sp_MuonSach">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="DoAnThuVienNhom12Model.sp_MuonSach_Result">
+                <ScalarProperty Name="MaPhieuMuon" ColumnName="MaPhieuMuon" />
+                <ScalarProperty Name="Success" ColumnName="Success" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="sp_TimKiemSach" FunctionName="DoAnThuVienNhom12Model.Store.sp_TimKiemSach">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="DoAnThuVienNhom12Model.sp_TimKiemSach_Result">
+                <ScalarProperty Name="MaSach" ColumnName="MaSach" />
+                <ScalarProperty Name="TenSach" ColumnName="TenSach" />
+                <ScalarProperty Name="MaDanhMuc" ColumnName="MaDanhMuc" />
+                <ScalarProperty Name="MaTacGia" ColumnName="MaTacGia" />
+                <ScalarProperty Name="MaNXB" ColumnName="MaNXB" />
+                <ScalarProperty Name="NamXuatBan" ColumnName="NamXuatBan" />
+                <ScalarProperty Name="SoTrang" ColumnName="SoTrang" />
+                <ScalarProperty Name="NgonNgu" ColumnName="NgonNgu" />
+                <ScalarProperty Name="GiaNhap" ColumnName="GiaNhap" />
+                <ScalarProperty Name="GiaBia" ColumnName="GiaBia" />
+                <ScalarProperty Name="MoTa" ColumnName="MoTa" />
+                <ScalarProperty Name="TuKhoa" ColumnName="TuKhoa" />
+                <ScalarProperty Name="AnhBia" ColumnName="AnhBia" />
+                <ScalarProperty Name="MaKe" ColumnName="MaKe" />
+                <ScalarProperty Name="SoLuong" ColumnName="SoLuong" />
+                <ScalarProperty Name="SoLuongCoSan" ColumnName="SoLuongCoSan" />
+                <ScalarProperty Name="LuotMuon" ColumnName="LuotMuon" />
+                <ScalarProperty Name="LuotXem" ColumnName="LuotXem" />
+                <ScalarProperty Name="TinhTrang" ColumnName="TinhTrang" />
+                <ScalarProperty Name="NgayNhap" ColumnName="NgayNhap" />
+                <ScalarProperty Name="NgayCapNhat" ColumnName="NgayCapNhat" />
+                <ScalarProperty Name="TenDanhMuc" ColumnName="TenDanhMuc" />
+                <ScalarProperty Name="TenTacGia" ColumnName="TenTacGia" />
+                <ScalarProperty Name="TenNXB" ColumnName="TenNXB" />
+                <ScalarProperty Name="TenKe" ColumnName="TenKe" />
+                <ScalarProperty Name="TenKho" ColumnName="TenKho" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="sp_TraSach" FunctionName="DoAnThuVienNhom12Model.Store.sp_TraSach" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

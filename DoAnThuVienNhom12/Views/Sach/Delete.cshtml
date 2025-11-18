@@ -1,0 +1,31 @@
+﻿@model DoAnThuVienNhom12.Models.Sach
+@{
+    ViewBag.Title = "Xóa sách";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2><i class="fa fa-trash"></i> Xóa sách</h2>
+<hr />
+
+<p>Bạn có chắc muốn xóa <strong>@Model.TenSach</strong> không?</p>
+
+<dl class="dl-horizontal">
+    <dt>Danh mục:</dt>
+    <dd>@Model.DanhMuc?.TenDanhMuc</dd>
+    <dt>Tác giả:</dt>
+    <dd>@Model.TacGia?.TenTacGia</dd>
+    <dt>Nhà xuất bản:</dt>
+    <dd>@Model.NhaXuatBan?.TenNXB</dd>
+    <dt>Năm XB:</dt>
+    <dd>@Model.NamXuatBan</dd>
+    <dt>Giá bìa:</dt>
+    <dd>@Model.GiaBia?.ToString("N0") VNĐ</dd>
+</dl>
+
+@using (Html.BeginForm("Delete", "Sach", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.MaSach)
+    <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Xóa</button>
+    <a href="@Url.Action("Index")" class="btn btn-default"><i class="fa fa-arrow-left"></i> Hủy</a>
+}

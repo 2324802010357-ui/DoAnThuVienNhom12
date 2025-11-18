@@ -1,3 +1,64 @@
-﻿@{ ViewBag.Title = "Tìm kiếm"; }
-<h2 class="page-header">Kết quả tìm kiếm</h2>
-<p>Từ khóa: <strong>@(ViewBag.Query ?? "")</strong></p>
+﻿@model IEnumerable<DoAnThuVienNhom12.Models.Sach>
+@{
+    ViewBag.Title = "Kết quả tìm kiếm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="page-header">
+    <i class="fa fa-search"></i> Kết quả tìm kiếm
+</h2>
+
+@if (ViewBag.Query != null)
+{
+    <p>Từ khóa: <strong>@ViewBag.Query</strong></p>
+}
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Mã sách</th>
+                <th>Tên sách</th>
+                <th>Tác giả</th>
+                <th>Danh mục</th>
+                <th>Năm XB</th>
+                <th>Tình trạng</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model)
+            {
+                <tr>
+                    <td>@s.MaSach</td>
+                    <td>@s.TenSach</td>
+                    <td>@s.TacGia?.TenTacGia</td>
+                    <td>@s.DanhMuc?.TenDanhMuc</td>
+                    <td>@s.NamXuatBan</td>
+                    <td>
+                        @if (s.TinhTrang == "Còn hàng")
+                        {
+                            <span class="label label-success">Còn hàng</span>
+                        }
+                        else
+                        {
+                            <span class="label label-danger">Hết hàng</span>
+                        }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Detail", "Sach", new { id = s.MaSach })" class="btn btn-xs btn-info">
+                            <i class="fa fa-eye"></i> Xem
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-warning">
+        <i class="fa fa-exclamation-circle"></i> Không tìm thấy kết quả phù hợp.
+    </div>
+}

@@ -1,0 +1,31 @@
+﻿@{
+    ViewBag.Title = "Trang Thủ thư";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="animate-fade-in" style="margin-top:20px;">
+
+    <div class="page-header text-center">
+        <h2><i class="fa fa-user"></i> Bảng điều khiển Thủ thư</h2>
+        <p class="lead">Chào mừng bạn trở lại!</p>
+    </div>
+
+    <div class="row text-center">
+
+        <!-- Nút truy cập duy nhất -->
+        <div class="col-md-4 col-md-offset-4">
+            <a href="@Url.Action("Index","MuonTra")" style="text-decoration:none;">
+                <div class="library-card" style="padding:25px;">
+                    <div class="staff-avatar"
+                         style="background: linear-gradient(135deg,#3498db,#2980b9);width:80px;height:80px;line-height:80px;margin:auto;">
+                        <i class="fa fa-exchange" style="font-size:32px;color:white;"></i>
+                    </div>
+
+                    <h3 style="margin-top:15px;">Quản lý Mượn – Trả</h3>
+                    <p>Xử lý trả sách, phạt trễ hạn & tạo phiếu mượn mới.</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "Truy cập bị từ chối";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Nếu là thủ thư, sẽ tự dùng layout thủ thư
+    string role = Session["Role"] != null ? Session["Role"].ToString() : "";
+}
+
+<div class="container text-center mt-5">
+    <h1 class="text-danger mb-3">
+        <i class="fa fa-ban"></i> Truy cập bị từ chối
+    </h1>
+    <p class="lead text-muted">
+        🚫 @ViewBag.Message
+    </p>
+
+    <div class="mt-4">
+        @if (role == "Thủ thư")
+        {
+            <a href="@Url.Action("Index", "ThuThu")" class="btn btn-primary btn-lg">
+                <i class="fa fa-home"></i> Về trang chủ Thủ thư
+            </a>
+        }
+        else if (role == "Admin")
+        {
+            <a href="@Url.Action("Index", "Admin")" class="btn btn-warning btn-lg">
+                <i class="fa fa-home"></i> Về trang chủ Admin
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary btn-lg">
+                <i class="fa fa-home"></i> Về trang chủ
+            </a>
+        }
+    </div>
+
+    <div class="mt-5">
+        <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png"
+             alt="Access Denied"
+             style="width: 150px; opacity: 0.8;" />
+    </div>
+</div>
+
+<style>
+    .lead {
+        font-size: 1.2rem;
+    }
+
+    .btn-lg {
+        padding: 10px 30px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+    }
+</style>

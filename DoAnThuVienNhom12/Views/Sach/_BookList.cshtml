@@ -1,240 +1,104 @@
-﻿@model List<DoAnThuVienNhom12.Controllers.SachModel>
+﻿@model IEnumerable<DoAnThuVienNhom12.Models.Sach>
 
-@if (Model != null && Model.Any())
-{
-    <div class="row">
-        @foreach (var sach in Model)
+<table class="table table-bordered table-hover table-striped">
+    <thead style="background-color:#2c3e50; color:white;">
+        <tr>
+            <th style="width:80px;">Mã sách</th>
+            <th>Tên sách</th>
+            <th>Tác giả</th>
+            <th>Danh mục</th>
+            <th>Nhà xuất bản</th> <!-- ✅ THÊM CỘT NXB RIÊNG -->
+            <th style="width:90px;">Năm XB</th>
+            <th style="width:90px;">Số lượng</th>
+            <th style="width:120px;">Tình trạng</th>
+            <th style="width:140px;">Thao tác</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model != null && Model.Any())
         {
-            <div class="col-md-6 col-lg-4 book-item grid-view" style="margin-bottom: 20px;">
-                <div class="book-card">
-                    <div class="book-cover">
-                        <img src="https://placehold.co/120x160/667eea/ffffff?text=@sach.MaSach" alt="@sach.TenSach" class="img-responsive">
-                        <div class="book-overlay">
-                            <a href="@Url.Action("Detail", "Sach", new { id = sach.MaSach })" class="btn btn-primary btn-sm">
-                                <i class="fa fa-eye"></i> Xem chi tiết
-                            </a>
-                        </div>
-                    </div>
-                    <div class="book-info">
-                        <h5 class="book-title">
-                            <a href="@Url.Action("Detail", "Sach", new { id = sach.MaSach })">@sach.TenSach</a>
-                        </h5>
-                        <p class="book-author">
-                            <i class="fa fa-user"></i> @sach.TacGia
-                        </p>
-                        <div class="book-meta">
-                            <span class="book-category">
-                                <i class="fa fa-tag"></i> @sach.TheLoai
-                            </span>
-                            <span class="book-year">
-                                <i class="fa fa-calendar"></i> @sach.NamXuatBan
-                            </span>
-                        </div>
-                        <div class="book-status">
-                            @if (sach.TinhTrang == "C? s?n")
+            foreach (var s in Model)
+            {
+                <tr>
+                    <td>@s.MaSach</td>
+                    <td>
+                        <strong>@s.TenSach</strong><br />
+                        <small class="text-muted">
+                            @if (!string.IsNullOrEmpty(s.TuKhoa))
                             {
-                                <span class="label label-success">
-                                    <i class="fa fa-check"></i> @sach.TinhTrang (@sach.SoLuong cu?n)
-                                </span>
+                                <i class="fa fa-tags"></i> @s.TuKhoa
                             }
-                            else if (sach.TinhTrang == "?ang m??n")
-                            {
-                                <span class="label label-warning">
-                                    <i class="fa fa-clock-o"></i> @sach.TinhTrang
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="label label-danger">
-                                    <i class="fa fa-times"></i> @sach.TinhTrang
-                                </span>
-                            }
-                        </div>
-                        <div class="book-actions">
-                            @if (sach.TinhTrang == "C? s?n")
-                            {
-                                <button class="btn btn-success btn-sm btn-block" onclick="borrowBook('@sach.MaSach')">
-                                    <i class="fa fa-plus"></i> M??n s?ch
-                                </button>
-                            }
-                            else
-                            {
-                                <button class="btn btn-default btn-sm btn-block" disabled>
-                                    <i class="fa fa-ban"></i> Kh?ng kh? d?ng
-                                </button>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </small>
+                    </td>
+
+                    <!-- ✅ Hiển thị đúng dữ liệu -->
+                    <td>@(s.TacGia?.TenTacGia ?? "—")</td>
+                    <td>@(s.DanhMuc?.TenDanhMuc ?? "—")</td>
+                    <td>@(s.NhaXuatBan?.TenNXB ?? "—")</td> <!-- ✅ Cột NXB -->
+                    <td>@s.NamXuatBan</td> <!-- ✅ Năm xuất bản đúng cột -->
+                    <td>@s.SoLuong</td>
+
+                    <td>
+                        @if (s.TinhTrang == "Còn hàng")
+                        {
+                            <span class="label label-success">Còn hàng</span>
+                        }
+                        else
+                        {
+                            <span class="label label-danger">Hết hàng</span>
+                        }
+                    </td>
+
+                    <td class="text-center">
+                        <a href="@Url.Action("Detail", "Sach", new { id = s.MaSach })"
+                           class="btn btn-xs btn-info" title="Xem chi tiết">
+                            <i class="fa fa-eye"></i>
+                        </a>
+                        <a href="@Url.Action("Edit", "Sach", new { id = s.MaSach })"
+                           class="btn btn-xs btn-warning" title="Sửa thông tin">
+                            <i class="fa fa-pencil"></i>
+                        </a>
+                        <a href="@Url.Action("Delete", "Sach", new { id = s.MaSach })"
+                           class="btn btn-xs btn-danger" title="Xóa sách"
+                           onclick="return confirm('Bạn có chắc muốn xóa sách này không?');">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
         }
-    </div>
-
-    <!-- Ph?n trang -->
-    <div class="text-center" style="margin-top: 20px;">
-        <nav aria-label="Ph?n trang s?ch">
-            <ul class="pagination">
-                <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
-                <li class="active"><a href="#">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
-            </ul>
-        </nav>
-    </div>
-}
-else
-{
-    <div class="no-results">
-        <div class="text-center" style="padding: 40px;">
-            <i class="fa fa-search fa-4x text-muted"></i>
-            <h3 style="margin-top: 20px;">Kh?ng t?m th?y s?ch n?o</h3>
-            <p class="text-muted">Vui l?ng th? l?i v?i t? kh?a kh?c ho?c ?i?u ch?nh b? l?c t?m ki?m</p>
-            <button class="btn btn-primary" onclick="$('#clearFilters').click();">
-                <i class="fa fa-eraser"></i> X?a b? l?c
-            </button>
-        </div>
-    </div>
-}
-
-<script>
-function borrowBook(maSach) {
-    if (confirm('B?n c? mu?n m??n s?ch n?y kh?ng?')) {
-        // Chuy?n h??ng t?i trang t?o phi?u m??n
-        window.location.href = '@Url.Action("PhieuMuon", "MuonTra")?maSach=' + maSach;
-    }
-}
-</script>
+        else
+        {
+            <tr>
+                <td colspan="9" class="text-center text-muted">
+                    <i class="fa fa-info-circle"></i> Không có sách nào được tìm thấy.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
 
 <style>
-    .book-card {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        overflow: hidden;
-        transition: transform 0.3s, box-shadow 0.3s;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .book-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .book-cover {
-        position: relative;
+    .table td, .table th {
+        vertical-align: middle !important;
         text-align: center;
-        padding: 15px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
-    .book-cover img {
-        max-height: 200px;
-        border-radius: 4px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    .label-success {
+        background-color: #27ae60;
     }
 
-    .book-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s;
+    .label-danger {
+        background-color: #c0392b;
     }
 
-    .book-card:hover .book-overlay {
-        opacity: 1;
+    .btn-xs {
+        margin-right: 2px;
     }
 
-    .book-info {
-        padding: 15px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .book-title {
-        margin: 0 0 8px 0;
-        font-size: 16px;
-        font-weight: bold;
-    }
-
-    .book-title a {
-        color: #2c3e50;
-        text-decoration: none;
-    }
-
-    .book-title a:hover {
-        color: #3498db;
-    }
-
-    .book-author {
-        color: #7f8c8d;
-        margin: 0 0 10px 0;
-        font-size: 14px;
-    }
-
-    .book-meta {
-        margin-bottom: 10px;
+    .text-muted {
         font-size: 12px;
-    }
-
-    .book-meta span {
-        display: inline-block;
-        margin-right: 15px;
-        color: #95a5a6;
-    }
-
-    .book-status {
-        margin-bottom: 15px;
-    }
-
-    .book-actions {
-        margin-top: auto;
-    }
-
-    .no-results {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    /* List view styles */
-    .book-item.list-view {
-        width: 100%;
-    }
-
-    .book-item.list-view .book-card {
-        flex-direction: row;
-        height: auto;
-    }
-
-    .book-item.list-view .book-cover {
-        width: 120px;
-        padding: 10px;
-    }
-
-    .book-item.list-view .book-cover img {
-        max-height: 100px;
-    }
-
-    .book-item.list-view .book-info {
-        flex: 1;
-        padding: 15px;
-    }
-
-    .book-item.list-view .book-actions {
-        width: 150px;
-        display: flex;
-        align-items: center;
-        padding: 15px;
+        color: #777;
     }
 </style>

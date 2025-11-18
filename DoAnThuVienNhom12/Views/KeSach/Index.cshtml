@@ -1,6 +1,10 @@
-﻿@{
+﻿@model IEnumerable<DoAnThuVienNhom12.Models.KeSach>
+
+@{
     ViewBag.Title = "Quản lý kệ sách";
- }
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
 <style>
     .shelf-card {
         background: white;
@@ -11,10 +15,10 @@
         transition: all 0.3s;
     }
 
-    .shelf-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-    }
+        .shelf-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
 
     .shelf-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -32,26 +36,6 @@
         background: #f9f9f9;
     }
 
-    .section-item {
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        padding: 10px;
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .section-badge {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-
     .capacity-bar {
         height: 8px;
         background: #e0e0e0;
@@ -66,53 +50,13 @@
         transition: width 0.3s;
     }
 
-    .capacity-bar-fill.warning {
-        background: linear-gradient(90deg, #f39c12, #e67e22);
-    }
+        .capacity-bar-fill.warning {
+            background: linear-gradient(90deg, #f39c12, #e67e22);
+        }
 
-    .capacity-bar-fill.danger {
-        background: linear-gradient(90deg, #e74c3c, #c0392b);
-    }
-
-    .shelf-visual {
-        border: 3px solid #333;
-        border-radius: 10px;
-        padding: 20px;
-        background: linear-gradient(to bottom, #f5f5f5, #e0e0e0);
-        position: relative;
-    }
-
-    .shelf-level {
-        border: 2px solid #666;
-        border-radius: 6px;
-        padding: 12px;
-        margin-bottom: 15px;
-        background: linear-gradient(to bottom, #fff, #f0f0f0);
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        min-height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .book-icon {
-        width: 40px;
-        height: 50px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 4px;
-        display: inline-block;
-        margin: 0 2px;
-        position: relative;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-    }
-
-    .book-icon:nth-child(2n) {
-        background: linear-gradient(135deg, #f093fb, #f5576c);
-    }
-
-    .book-icon:nth-child(3n) {
-        background: linear-gradient(135deg, #4facfe, #00f2fe);
-    }
+        .capacity-bar-fill.danger {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+        }
 
     .modal-header-custom {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -141,87 +85,76 @@
                         </button>
                     </div>
                 </div>
-                <hr>
-                <div id="shelfList"></div>
+                <hr />
+
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var ke in Model)
+                    {
+                        var usagePercent = ke.SucChua == 0 ? 0 : (int)(((double)ke.SoLuongHienTai / ke.SucChua) * 100);
+                        var shelfBarClass = usagePercent > 90 ? "danger" : usagePercent > 75 ? "warning" : "";
+
+                        <div class="shelf-section">
+                            <div class="shelf-header">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <div>
+                                        <h4 style="margin:0;"><i class="fa fa-th"></i> @ke.TenKe</h4>
+                                        <small>@ke.ViTri</small>
+                                    </div>
+                                    <div><span class="label label-default">#@ke.MaKe</span></div>
+                                </div>
+                            </div>
+
+                            <p><b>Kho:</b> @ke.Kho.TenKho</p>
+                            <p><b>Sức chứa:</b> @ke.SucChua | <b>Hiện tại:</b> @ke.SoLuongHienTai (@usagePercent%)</p>
+
+                            <div class="capacity-bar">
+                                <div class="capacity-bar-fill @shelfBarClass" style="width:@usagePercent%"></div>
+                            </div>
+
+                            <div class="text-right" style="margin-top:10px;">
+                                <a href="@Url.Action("Detail","KeSach", new { id = ke.MaKe })" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-eye"></i> Chi tiết
+                                </a>
+                                <button class="btn btn-warning btn-sm btn-edit"
+                                        data-id="@ke.MaKe"
+                                        data-tenke="@ke.TenKe"
+                                        data-makho="@ke.MaKho"
+                                        data-vitri="@ke.ViTri"
+                                        data-succhua="@ke.SucChua">
+                                    <i class="fa fa-edit"></i> Sửa
+                                </button>
+                                <button class="btn btn-danger btn-sm btn-delete" data-id="@ke.MaKe">
+                                    <i class="fa fa-trash"></i> Xóa
+                                </button>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-center text-muted">Chưa có kệ nào được thêm.</p>
+                }
             </div>
         </div>
 
         <div class="col-md-4">
             <!-- Thống kê -->
             <div class="shelf-card">
-                <h4><i class="fa fa-chart-bar"></i> Thống kê</h4>
-                <hr>
-                <div class="stat-item" style="margin-bottom:15px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>Tổng số kệ:</span>
-                        <strong id="totalShelves">0</strong>
-                    </div>
-                </div>
-                <div class="stat-item" style="margin-bottom:15px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>Tổng số ngăn:</span>
-                        <strong id="totalSections">0</strong>
-                    </div>
-                </div>
-                <div class="stat-item" style="margin-bottom:15px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>Tổng sức chứa:</span>
-                        <strong id="totalCapacity">0</strong>
-                    </div>
-                </div>
-                <div class="stat-item">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>Đã sử dụng:</span>
-                        <strong id="totalUsed">0</strong>
-                    </div>
-                    <div class="capacity-bar">
-                        <div class="capacity-bar-fill" id="overallCapacityBar" style="width:0%"></div>
-                    </div>
-                </div>
-            </div>
+                <h4><i class="fa fa-chart-bar"></i> Thống kê tổng</h4>
+                <hr />
+                <p><b>Tổng số kệ:</b> @Model.Count()</p>
+                <p><b>Tổng sức chứa:</b> @Model.Sum(k => k.SucChua)</p>
+                <p><b>Đã sử dụng:</b> @Model.Sum(k => k.SoLuongHienTai)</p>
 
-            <!-- Mô phỏng kệ 3D -->
-            <div class="shelf-card">
-                <h4><i class="fa fa-cube"></i> Mô phỏng kệ sách</h4>
-                <hr>
-                <div class="shelf-visual">
-                    <div class="text-center" style="margin-bottom:10px;">
-                        <strong>Kệ A - Lập trình</strong>
-                    </div>
-                    <div class="shelf-level">
-                        <div>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                        </div>
-                        <span class="section-badge">Ngăn 4</span>
-                    </div>
-                    <div class="shelf-level">
-                        <div>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                        </div>
-                        <span class="section-badge">Ngăn 3</span>
-                    </div>
-                    <div class="shelf-level">
-                        <div>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                        </div>
-                        <span class="section-badge">Ngăn 2</span>
-                    </div>
-                    <div class="shelf-level">
-                        <div>
-                            <span class="book-icon"></span>
-                            <span class="book-icon"></span>
-                        </div>
-                        <span class="section-badge">Ngăn 1</span>
-                    </div>
+                @{
+                    var totalCapacity = Model.Sum(k => k.SucChua);
+                    var totalUsed = Model.Sum(k => k.SoLuongHienTai);
+                    var percent = totalCapacity == 0 ? 0 : (int)(((double)totalUsed / totalCapacity) * 100);
+                    var totalBarClass = percent > 90 ? "danger" : percent > 75 ? "warning" : "";
+                }
+                <div class="capacity-bar">
+                    <div class="capacity-bar-fill @totalBarClass" style="width:@percent%"></div>
                 </div>
             </div>
         </div>
@@ -241,276 +174,124 @@
             <div class="modal-body">
                 <form id="addShelfForm">
                     <div class="form-group">
-                        <label>Mã kệ <span class="text-danger">*</span></label>
-                        <input type="text" name="code" class="form-control" placeholder="Ví dụ: KE_A" required>
+                        <label>Tên kệ <span class="text-danger">*</span></label>
+                        <input type="text" name="TenKe" class="form-control" required />
                     </div>
                     <div class="form-group">
-                        <label>Tên kệ <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" placeholder="Ví dụ: Kệ A - Lập trình" required>
+                        <label>Kho chứa <span class="text-danger">*</span></label>
+                        <select name="MaKho" class="form-control">
+                            @foreach (var kho in ViewBag.KhoList as List<DoAnThuVienNhom12.Models.Kho>)
+                            {
+                                <option value="@kho.MaKho">@kho.TenKho</option>
+                            }
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Vị trí</label>
-                        <input type="text" name="location" class="form-control" placeholder="Ví dụ: Tầng 1 - Khu A">
+                        <input type="text" name="ViTri" class="form-control" />
                     </div>
                     <div class="form-group">
-                        <label>Số ngăn <span class="text-danger">*</span></label>
-                        <input type="number" name="sections" class="form-control" value="4" min="1" max="10" required>
+                        <label>Sức chứa</label>
+                        <input type="number" name="SucChua" class="form-control" min="1" value="50" />
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" id="btnSaveShelf">
-                    <i class="fa fa-save"></i> Lưu kệ
+                <button type="button" id="btnSaveShelf" class="btn btn-primary">
+                    <i class="fa fa-save"></i> Lưu
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Quản lý Ngăn -->
-<div class="modal fade" id="manageSectionsModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+<!-- Modal Sửa Kệ -->
+<div class="modal fade" id="editShelfModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header modal-header-custom">
                 <button type="button" class="close" data-dismiss="modal" style="color:white;">
                     <span>&times;</span>
                 </button>
-                <h4 class="modal-title"><i class="fa fa-bars"></i> Quản lý ngăn sách - <span id="currentShelfName"></span></h4>
+                <h4 class="modal-title"><i class="fa fa-edit"></i> Sửa thông tin kệ</h4>
             </div>
             <div class="modal-body">
-                <button type="button" class="btn btn-success btn-sm" id="btnAddSection">
-                    <i class="fa fa-plus"></i> Thêm ngăn
-                </button>
-                <hr>
-                <div id="sectionsList"></div>
+                <form id="editShelfForm">
+                    <input type="hidden" name="MaKe" />
+                    <div class="form-group">
+                        <label>Tên kệ</label>
+                        <input type="text" name="TenKe" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Kho chứa</label>
+                        <select name="MaKho" class="form-control">
+                            @foreach (var kho in ViewBag.KhoList as List<DoAnThuVienNhom12.Models.Kho>)
+                            {
+                                <option value="@kho.MaKho">@kho.TenKho</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Vị trí</label>
+                        <input type="text" name="ViTri" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Sức chứa</label>
+                        <input type="number" name="SucChua" class="form-control" min="1" />
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                <button type="button" id="btnUpdateShelf" class="btn btn-primary">
+                    <i class="fa fa-save"></i> Cập nhật
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-<script>
-(function(){
-    var SHELVES = [
-        {
-            code: 'KE_A',
-            name: 'Kệ A - Lập trình',
-            location: 'Tầng 1 - Khu A',
-            sections: [
-                {name:'Ngăn 1', capacity:50, used:45, category:'C#/.NET'},
-                {name:'Ngăn 2', capacity:50, used:38, category:'Java'},
-                {name:'Ngăn 3', capacity:50, used:42, category:'Python'},
-                {name:'Ngăn 4', capacity:50, used:30, category:'Web Development'}
-            ]
-        },
-        {
-            code: 'KE_B',
-            name: 'Kệ B - Toán học',
-            location: 'Tầng 1 - Khu B',
-            sections: [
-                {name:'Ngăn 1', capacity:40, used:35, category:'Giải tích'},
-                {name:'Ngăn 2', capacity:40, used:28, category:'Đại số'},
-                {name:'Ngăn 3', capacity:40, used:32, category:'Hình học'}
-            ]
-        },
-        {
-            code: 'KE_C',
-            name: 'Kệ C - Văn học',
-            location: 'Tầng 2 - Khu A',
-            sections: [
-                {name:'Ngăn 1', capacity:60, used:55, category:'Văn học Việt Nam'},
-                {name:'Ngăn 2', capacity:60, used:48, category:'Văn học nước ngoài'},
-                {name:'Ngăn 3', capacity:60, used:40, category:'Thơ ca'},
-                {name:'Ngăn 4', capacity:60, used:35, category:'Truyện ngắn'}
-            ]
-        }
-    ];
-
-    var currentShelf = null;
-
-    function renderShelves(){
-        var container = $('#shelfList').empty();
-        var totalShelves = SHELVES.length;
-        var totalSections = 0;
-        var totalCapacity = 0;
-        var totalUsed = 0;
-
-        SHELVES.forEach(function(shelf){
-            var shelfCapacity = 0;
-            var shelfUsed = 0;
-            
-            shelf.sections.forEach(function(section){
-                shelfCapacity += section.capacity;
-                shelfUsed += section.used;
-                totalSections++;
+    <script>
+        // ============= Thêm kệ =============
+        $('#btnSaveShelf').on('click', function () {
+            var data = $('#addShelfForm').serialize();
+            $.post('/KeSach/ThemKe', data, function (res) {
+                alert(res.message);
+                if (res.success) location.reload();
             });
-
-            totalCapacity += shelfCapacity;
-            totalUsed += shelfUsed;
-
-            var usagePercent = Math.round((shelfUsed / shelfCapacity) * 100);
-            var barClass = usagePercent > 90 ? 'danger' : usagePercent > 75 ? 'warning' : '';
-
-            var card = $('<div class="shelf-section"/>');
-            card.append('<div class="shelf-header">'+
-                '<div style="display:flex;justify-content:space-between;align-items:center;">'+
-                '<div><h4 style="margin:0;"><i class="fa fa-th"></i> '+shelf.name+'</h4>'+
-                '<small>'+shelf.location+'</small></div>'+
-                '<div><span class="label label-default">'+shelf.code+'</span></div>'+
-                '</div>'+
-                '</div>');
-
-            var sectionsHtml = '';
-            shelf.sections.forEach(function(section){
-                var sectionPercent = Math.round((section.used / section.capacity) * 100);
-                var sectionBarClass = sectionPercent > 90 ? 'danger' : sectionPercent > 75 ? 'warning' : '';
-                
-                sectionsHtml += '<div class="section-item">'+
-                    '<div style="flex:1;">'+
-                    '<strong>'+section.name+'</strong> - '+section.category+'<br>'+
-                    '<small>'+section.used+' / '+section.capacity+' cuốn ('+sectionPercent+'%)</small>'+
-                    '<div class="capacity-bar"><div class="capacity-bar-fill '+sectionBarClass+'" style="width:'+sectionPercent+'%"></div></div>'+
-                    '</div>'+
-                    '</div>';
-            });
-            card.append(sectionsHtml);
-
-            var actions = $('<div class="text-right" style="margin-top:10px;"/>');
-            actions.append('<button class="btn btn-sm btn-primary btn-manage-sections" data-shelf="'+shelf.code+'">'+
-                           '<i class="fa fa-bars"></i> Quản lý ngăn</button> ');
-            actions.append('<button class="btn btn-sm btn-warning btn-edit-shelf" data-shelf="'+shelf.code+'">'+
-                           '<i class="fa fa-edit"></i> Sửa</button> ');
-            actions.append('<button class="btn btn-sm btn-danger btn-delete-shelf" data-shelf="'+shelf.code+'">'+
-                           '<i class="fa fa-trash"></i> Xóa</button>');
-            card.append(actions);
-
-            container.append(card);
         });
 
-        // Update stats
-        $('#totalShelves').text(totalShelves);
-        $('#totalSections').text(totalSections);
-        $('#totalCapacity').text(totalCapacity);
-        $('#totalUsed').text(totalUsed);
-        var overallPercent = Math.round((totalUsed / totalCapacity) * 100);
-        $('#overallCapacityBar').css('width', overallPercent+'%');
-        if(overallPercent > 90) $('#overallCapacityBar').addClass('danger');
-        else if(overallPercent > 75) $('#overallCapacityBar').addClass('warning');
-    }
-
-    $('#shelfList').on('click', '.btn-manage-sections', function(){
-        var shelfCode = $(this).data('shelf');
-        currentShelf = SHELVES.find(s => s.code === shelfCode);
-        if(currentShelf){
-            $('#currentShelfName').text(currentShelf.name);
-            renderSections();
-            $('#manageSectionsModal').modal('show');
-        }
-    });
-
-    function renderSections(){
-        if(!currentShelf) return;
-        var container = $('#sectionsList').empty();
-        
-        currentShelf.sections.forEach(function(section, index){
-            var percent = Math.round((section.used / section.capacity) * 100);
-            var barClass = percent > 90 ? 'danger' : percent > 75 ? 'warning' : '';
-            
-            var item = $('<div class="section-item" style="display:block;"/>');
-            item.append('<div style="display:flex;justify-content:space-between;align-items:center;">'+
-                '<div style="flex:1;">'+
-                '<h5 style="margin:0;">'+section.name+' - '+section.category+'</h5>'+
-                '<div>Sức chứa: <input type="number" class="section-capacity" data-index="'+index+'" value="'+section.capacity+'" style="width:70px;"> cuốn</div>'+
-                '<div>Đã dùng: '+section.used+' cuốn ('+percent+'%)</div>'+
-                '<div class="capacity-bar"><div class="capacity-bar-fill '+barClass+'" style="width:'+percent+'%"></div></div>'+
-                '</div>'+
-                '<div><button class="btn btn-danger btn-sm btn-remove-section" data-index="'+index+'">'+
-                '<i class="fa fa-trash"></i></button></div>'+
-                '</div>');
-            container.append(item);
+        // ============= Mở modal Sửa =============
+        $('.btn-edit').on('click', function () {
+            var id = $(this).data('id');
+            $('#editShelfForm [name="MaKe"]').val(id);
+            $('#editShelfForm [name="TenKe"]').val($(this).data('tenke'));
+            $('#editShelfForm [name="MaKho"]').val($(this).data('makho'));
+            $('#editShelfForm [name="ViTri"]').val($(this).data('vitri'));
+            $('#editShelfForm [name="SucChua"]').val($(this).data('succhua'));
+            $('#editShelfModal').modal('show');
         });
-    }
 
-    $('#btnAddSection').on('click', function(){
-        if(!currentShelf) return;
-        var newSection = {
-            name: 'Ngăn ' + (currentShelf.sections.length + 1),
-            capacity: 50,
-            used: 0,
-            category: 'Chưa phân loại'
-        };
-        currentShelf.sections.push(newSection);
-        renderSections();
-        renderShelves();
-    });
-
-    $('#sectionsList').on('click', '.btn-remove-section', function(){
-        var index = $(this).data('index');
-        if(confirm('Xóa ngăn này?')){
-            currentShelf.sections.splice(index, 1);
-            renderSections();
-            renderShelves();
-        }
-    });
-
-    $('#sectionsList').on('change', '.section-capacity', function(){
-        var index = $(this).data('index');
-        currentShelf.sections[index].capacity = parseInt($(this).val()) || 50;
-        renderSections();
-        renderShelves();
-    });
-
-    $('#btnSaveShelf').on('click', function(){
-        var formData = $('#addShelfForm').serializeArray();
-        var data = {};
-        formData.forEach(item => data[item.name] = item.value);
-        
-        if(!data.code || !data.name){
-            alert('Vui lòng điền đầy đủ thông tin');
-            return;
-        }
-
-        var sections = [];
-        var numSections = parseInt(data.sections) || 4;
-        for(var i = 1; i <= numSections; i++){
-            sections.push({
-                name: 'Ngăn ' + i,
-                capacity: 50,
-                used: 0,
-                category: 'Chưa phân loại'
+        // ============= Cập nhật kệ =============
+        $('#btnUpdateShelf').on('click', function () {
+            var data = $('#editShelfForm').serialize();
+            $.post('/KeSach/SuaKe', data, function (res) {
+                alert(res.message);
+                if (res.success) location.reload();
             });
-        }
-
-        SHELVES.push({
-            code: data.code,
-            name: data.name,
-            location: data.location || '',
-            sections: sections
         });
 
-        $('#addShelfModal').modal('hide');
-        $('#addShelfForm')[0].reset();
-        renderShelves();
-        alert('Đã thêm kệ mới thành công!');
-    });
-
-    $('#shelfList').on('click', '.btn-delete-shelf', function(){
-        var shelfCode = $(this).data('shelf');
-        if(confirm('Bạn có chắc muốn xóa kệ này?')){
-            var index = SHELVES.findIndex(s => s.code === shelfCode);
-            if(index > -1){
-                SHELVES.splice(index, 1);
-                renderShelves();
-                alert('Đã xóa kệ thành công!');
+        // ============= Xóa kệ =============
+        $('.btn-delete').on('click', function () {
+            var id = $(this).data('id');
+            if (confirm('Bạn có chắc muốn xóa kệ này?')) {
+                $.post('/KeSach/XoaKe', { MaKe: id }, function (res) {
+                    alert(res.message);
+                    if (res.success) location.reload();
+                });
             }
-        }
-    });
-
-    renderShelves();
-})();
-</script>
+        });
+    </script>
 }

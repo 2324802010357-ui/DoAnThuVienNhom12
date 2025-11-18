@@ -1,0 +1,157 @@
+﻿@{
+    ViewBag.Title = "Bảng điều khiển Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var tongSach = ViewBag.TongSach ?? 0;
+    var tongDocGia = ViewBag.TongDocGia ?? 0;
+    var dangMuon = ViewBag.DangMuon ?? 0;
+    var quaHan = ViewBag.QuaHan ?? 0;
+    var tongKho = ViewBag.TongKho ?? 0;
+    var tongKe = ViewBag.TongKe ?? 0;
+}
+
+<style>
+    .admin-hero {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 15px;
+        padding: 28px;
+        margin-bottom: 22px;
+        box-shadow: 0 6px 16px rgba(0,0,0,.15);
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 18px 16px;
+        margin-bottom: 18px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,.06);
+        transition: .2s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0,0,0,.08);
+        }
+
+        .stat-card h4 {
+            margin: 6px 0 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .stat-card h2 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+    .quick-actions .btn {
+        min-width: 210px;
+        margin: 6px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 3px 10px rgba(0,0,0,.08);
+        transition: .18s ease;
+    }
+
+        .quick-actions .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.12);
+        }
+
+    .btn-kho {
+        background: linear-gradient(135deg,#9b59b6,#8e44ad);
+        color: white !important;
+    }
+
+    .btn-kesach {
+        background: linear-gradient(135deg,#34495e,#2c3e50);
+        color: white !important;
+    }
+
+    .sub-note {
+        color: #95a5a6;
+        font-size: 12px;
+        display: block;
+        margin-top: 2px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <!-- HERO -->
+    <div class="admin-hero">
+        <h2>📘 Bảng điều khiển quản trị</h2>
+        <p>Xin chào, <b>@(Session["UserName"] ?? "Admin")</b>!</p>
+    </div>
+
+    <!-- THỐNG KÊ NHANH -->
+    <div class="row text-center">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div style="font-size:22px;">📚</div>
+                <h4>Tổng sách</h4>
+                <h2 class="text-primary">@tongSach</h2>
+                <span class="sub-note">Đầu sách</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div style="font-size:22px;">👥</div>
+                <h4>Độc giả</h4>
+                <h2 class="text-success">@tongDocGia</h2>
+                <span class="sub-note">Thành viên</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div style="font-size:22px;">🔄</div>
+                <h4>Đang mượn</h4>
+                <h2 class="text-warning">@dangMuon</h2>
+                <span class="sub-note">Phiếu mượn</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card">
+                <div style="font-size:22px;">⏰</div>
+                <h4>Quá hạn</h4>
+                <h2 class="text-danger">@quaHan</h2>
+                <span class="sub-note">Cần xử lý</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- THỐNG KÊ KHO & KỆ -->
+    <div class="row text-center">
+        <div class="col-md-6 col-sm-6">
+            <div class="stat-card">
+                <div style="font-size:22px;">🏢</div>
+                <h4>Tổng kho</h4>
+                <h2 class="text-info">@tongKho</h2>
+                <span class="sub-note">Kho lưu trữ</span>
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <div class="stat-card">
+                <div style="font-size:22px;">🗃</div>
+                <h4>Tổng kệ sách</h4>
+                <h2 class="text-muted">@tongKe</h2>
+                <span class="sub-note">Kệ hoạt động</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIÊN KẾT NHANH QUẢN LÝ (CHỈ GIỮ LẠI CÁI ĐÚNG) -->
+    <div class="text-center quick-actions mt-4">
+        <a href="@Url.Action("Index", "DanhMuc")" class="btn btn-primary">📂 Quản lý Danh mục</a>
+        <a href="@Url.Action("Index", "Sach")" class="btn btn-success">📚 Quản lý Sách</a>
+        <a href="@Url.Action("Index", "NhanVien")" class="btn btn-info">👩‍💼 Quản lý Nhân viên</a>
+        <a href="@Url.Action("Index", "MuonTra")" class="btn btn-warning">🔄 Mượn/Trả</a>
+        <br />
+        <a href="@Url.Action("Index", "Kho")" class="btn btn-kho">🏢 Quản lý Kho <span class="sub-note">(@tongKho kho)</span></a>
+        <a href="@Url.Action("Index", "KeSach")" class="btn btn-kesach">🗃 Quản lý Kệ Sách <span class="sub-note">(@tongKe kệ)</span></a>
+    </div>
+
+</div>

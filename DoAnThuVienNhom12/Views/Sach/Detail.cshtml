@@ -1,150 +1,32 @@
-﻿@{
+﻿@model DoAnThuVienNhom12.Models.Sach
+
+@{
     ViewBag.Title = "Chi tiết sách";
 }
 
-<style>
-    .book-detail-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        padding: 30px;
-        margin-bottom: 20px;
-    }
-    .book-cover-large {
-        width: 100%;
-        max-width: 350px;
-        border-radius: 8px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        transition: transform 0.3s;
-    }
-    .book-cover-large:hover {
-        transform: scale(1.05);
-    }
-    .book-info-section {
-        background: #f9f9f9;
-        border-left: 4px solid #667eea;
-        padding: 15px;
-        margin-bottom: 15px;
-        border-radius: 4px;
-    }
-    .status-available {
-        background: linear-gradient(135deg, #27ae60, #2ecc71);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-weight: bold;
-    }
-    .rating-stars {
-        color: #f39c12;
-        font-size: 20px;
-    }
-</style>
+<h2><i class="fa fa-info-circle"></i> THÔNG TIN CHI TIẾT SÁCH</h2>
+<hr />
 
-<div class="animate-fade-in">
-    <ol class="breadcrumb">
-        <li><a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Trang chủ</a></li>
-        <li><a href="@Url.Action("Index", "Sach")"><i class="fa fa-book"></i> Danh sách sách</a></li>
-        <li class="active">Chi tiết sách</li>
-    </ol>
+<div class="row">
+    <div class="col-md-3 text-center">
+        <img src="@Model.AnhBia" alt="Ảnh bìa" class="img-thumbnail" style="max-width:200px; max-height:250px;" />
+    </div>
 
-    <div class="row">
-        <!-- Cột trái: Ảnh -->
-        <div class="col-md-4">
-            <div class="book-detail-card text-center">
-                <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400&h=600&fit=crop" 
-                     class="book-cover-large" alt="Bìa sách">
-                
-                <div style="margin-top: 20px;">
-                    <div class="rating-stars">
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star-half-o"></i>
-                        <span style="color:#666; font-size:14px;">(4.5/5)</span>
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <span class="status-available">
-                        <i class="fa fa-check-circle"></i> Còn 45 cuốn
-                    </span>
-                </div>
-
-                <div style="margin-top: 25px;">
-                    <button class="btn btn-primary btn-lg btn-block" onclick="location.href='@Url.Action("PhieuMuon","MuonTra")'">
-                        <i class="fa fa-book"></i> Mượn sách
-                    </button>
-                    <button class="btn btn-warning btn-block" onclick="location.href='@Url.Action("Edit","Sach")?id=@ViewBag.Id'">
-                        <i class="fa fa-edit"></i> Chỉnh sửa
-                    </button>
-                </div>
-            </div>
-
-            <div class="book-detail-card">
-                <h4><i class="fa fa-info-circle"></i> Thông tin thêm</h4>
-                <hr>
-                <p><i class="fa fa-eye text-primary"></i> <strong>Lượt xem:</strong> 1,234</p>
-                <p><i class="fa fa-download text-success"></i> <strong>Lượt mượn:</strong> 456</p>
-                <p><i class="fa fa-map-marker text-danger"></i> <strong>Vị trí:</strong> Kệ A - Ngăn 1</p>
-            </div>
-        </div>
-
-        <!-- Cột phải: Thông tin -->
-        <div class="col-md-8">
-            <div class="book-detail-card">
-                <h1 style="margin-top:0;">Lập trình C# nâng cao</h1>
-                <p class="lead">Từ cơ bản đến chuyên sâu</p>
-                
-                <div class="book-info-section">
-                    <div class="row">
-                        <div class="col-md-6"><p><strong>Mã sách:</strong> S001</p></div>
-                        <div class="col-md-6"><p><strong>Tác giả:</strong> Nguyễn Văn A</p></div>
-                        <div class="col-md-6"><p><strong>NXB:</strong> NXB Giáo dục</p></div>
-                        <div class="col-md-6"><p><strong>Năm XB:</strong> 2023</p></div>
-                        <div class="col-md-6"><p><strong>Danh mục:</strong> Công nghệ thông tin</p></div>
-                        <div class="col-md-6"><p><strong>Giá:</strong> <span class="text-danger">250,000 đ</span></p></div>
-                    </div>
-                </div>
-
-                <div class="book-info-section" style="border-left-color:#27ae60;">
-                    <h4><i class="fa fa-cubes"></i> Số lượng</h4>
-                    <div class="row" style="margin-top:15px;">
-                        <div class="col-md-4 text-center">
-                            <div style="background:linear-gradient(135deg,#3498db,#2980b9);color:white;padding:20px;border-radius:8px;">
-                                <h2 style="margin:0;">50</h2>
-                                <p style="margin:5px 0 0 0;">Tổng số</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-center">
-                            <div style="background:linear-gradient(135deg,#27ae60,#2ecc71);color:white;padding:20px;border-radius:8px;">
-                                <h2 style="margin:0;">45</h2>
-                                <p style="margin:5px 0 0 0;">Có sẵn</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-center">
-                            <div style="background:linear-gradient(135deg,#f39c12,#e67e22);color:white;padding:20px;border-radius:8px;">
-                                <h2 style="margin:0;">5</h2>
-                                <p style="margin:5px 0 0 0;">Đang mượn</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="book-info-section" style="border-left-color:#e74c3c;">
-                    <h4><i class="fa fa-align-left"></i> Mô tả</h4>
-                    <p style="line-height:1.8;">
-                        Cuốn sách "Lập trình C# nâng cao" là tài liệu toàn diện dành cho những người muốn nâng cao kỹ năng lập trình C#.
-                    </p>
-                </div>
-
-                <div>
-                    <strong><i class="fa fa-tags"></i> Từ khóa:</strong>
-                    <span class="label label-primary" style="margin:5px;">C#</span>
-                    <span class="label label-primary" style="margin:5px;">.NET</span>
-                    <span class="label label-primary" style="margin:5px;">Lập trình</span>
-                </div>
-            </div>
-        </div>
+    <div class="col-md-9">
+        <p><strong>Tên sách:</strong> @Model.TenSach</p>
+        <p><strong>Tác giả:</strong> @(Model.TacGia?.TenTacGia ?? "—")</p>
+        <p><strong>Danh mục:</strong> @(Model.DanhMuc?.TenDanhMuc ?? "—")</p>
+        <p><strong>Nhà xuất bản:</strong> @(Model.NhaXuatBan?.TenNXB ?? "—")</p>
+        <p><strong>Năm xuất bản:</strong> @Model.NamXuatBan</p>
+        <p><strong>Số trang:</strong> @Model.SoTrang</p>
+        <p><strong>Ngôn ngữ:</strong> @Model.NgonNgu</p>
+        <p><strong>Tình trạng:</strong> @Model.TinhTrang</p>
+        <p><strong>Số lượng còn:</strong> @Model.SoLuong</p>
+        <p><strong>Mô tả:</strong> @Model.MoTa</p>
     </div>
 </div>
+
+<hr />
+<a href="@Url.Action("Index", "Sach")" class="btn btn-default">
+    <i class="fa fa-arrow-left"></i> Quay lại
+</a>

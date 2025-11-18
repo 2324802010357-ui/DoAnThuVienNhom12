@@ -1,396 +1,163 @@
-﻿@{ ViewBag.Title = "Quản lý mượn trả"; }
+﻿@model IEnumerable<DoAnThuVienNhom12.Models.PhieuMuon>
+
+@{
+    ViewBag.Title = "Quản lý mượn - trả";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
 
 <div class="animate-fade-in">
+
+    <!-- ============================== -->
+    <!-- TIÊU ĐỀ -->
+    <!-- ============================== -->
     <div class="page-header">
         <h2><i class="fa fa-exchange"></i> @ViewBag.Title</h2>
-        <p class="lead">Quản lý hoạt động mượn và trả sách trong thư viện</p>
+        <p class="lead">Quản lý hoạt động mượn – trả sách của thư viện</p>
     </div>
 
-    <!-- Thống kê nhanh -->
-    <div class="row">
+    <!-- ============================== -->
+    <!-- DASHBOARD -->
+    <!-- ============================== -->
+    <div class="row text-center">
+
+        <!-- ĐANG MƯỢN -->
         <div class="col-md-3">
-            <div class="library-card text-center">
-                <div class="staff-avatar" style="background: linear-gradient(135deg, #3498db, #2980b9);">
-                    <i class="fa fa-book"></i>
+            <a href="@Url.Action("DangMuon","MuonTra")" style="text-decoration:none;">
+                <div class="library-card">
+                    <div class="staff-avatar" style="background: linear-gradient(135deg,#3498db,#2980b9);">
+                        <i class="fa fa-book"></i>
+                    </div>
+                    <h4>Đang mượn</h4>
+                    <h2 class="text-primary">@ViewBag.DangMuon</h2>
                 </div>
-                <h4>Đang mượn</h4>
-                <h2 class="text-primary" id="dangMuonCount">24</h2>
-            </div>
+            </a>
         </div>
+
+        <!-- QUÁ HẠN -->
         <div class="col-md-3">
-            <div class="library-card text-center">
-                <div class="staff-avatar" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
-                    <i class="fa fa-clock-o"></i>
+            <a href="@Url.Action("QuaHan","MuonTra")" style="text-decoration:none;">
+                <div class="library-card">
+                    <div class="staff-avatar" style="background: linear-gradient(135deg,#e74c3c,#c0392b);">
+                        <i class="fa fa-clock-o"></i>
+                    </div>
+                    <h4>Quá hạn</h4>
+                    <h2 class="text-danger">@ViewBag.QuaHan</h2>
                 </div>
-                <h4>Quá hạn</h4>
-                <h2 class="text-danger" id="quaHanCount">5</h2>
-            </div>
+            </a>
         </div>
+
+        <!-- ĐÃ TRẢ -->
         <div class="col-md-3">
-            <div class="library-card text-center">
-                <div class="staff-avatar" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
-                    <i class="fa fa-check"></i>
+            <a href="@Url.Action("DaTraDanhSach","MuonTra")" style="text-decoration:none;">
+                <div class="library-card">
+                    <div class="staff-avatar" style="background: linear-gradient(135deg,#27ae60,#2ecc71);">
+                        <i class="fa fa-check"></i>
+                    </div>
+                    <h4>Đã trả</h4>
+                    <h2 class="text-success">@ViewBag.DaTra</h2>
                 </div>
-                <h4>Đã trả</h4>
-                <h2 class="text-success" id="daTraCount">156</h2>
-            </div>
+            </a>
         </div>
+
+        <!-- PHÍ PHẠT -->
         <div class="col-md-3">
-            <div class="library-card text-center">
-                <div class="staff-avatar" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
-                    <i class="fa fa-money"></i>
+            <a href="@Url.Action("PhiPhat","MuonTra")" style="text-decoration:none;">
+                <div class="library-card">
+                    <div class="staff-avatar" style="background: linear-gradient(135deg,#f39c12,#e67e22);">
+                        <i class="fa fa-money"></i>
+                    </div>
+                    <h4>Phí phạt</h4>
+
+                    <h2 class="text-warning">
+                        @String.Format("{0:N0} đ", ViewBag.PhiPhat == null ? 0 : ViewBag.PhiPhat)
+                    </h2>
+
                 </div>
-                <h4>Phí phạt</h4>
-                <h2 class="text-warning" id="phiPhatTotal">250K</h2>
-            </div>
+            </a>
         </div>
+
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="library-card">
+    <!-- ============================== -->
+    <!-- TAB DANH SÁCH -->
+    <!-- ============================== -->
+    <div class="library-card" style="margin-top:25px;">
+
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" class="active">
-                <a href="#phieuMuonTab" aria-controls="phieuMuonTab" role="tab" data-toggle="tab">
+                <a href="#phieuMuonTab" role="tab" data-toggle="tab">
                     <i class="fa fa-arrow-right"></i> Phiếu mượn
                 </a>
             </li>
+
             <li role="presentation">
-                <a href="#phieuTraTab" aria-controls="phieuTraTab" role="tab" data-toggle="tab">
+                <a href="#phieuTraTab" role="tab" data-toggle="tab">
                     <i class="fa fa-arrow-left"></i> Phiếu trả
                 </a>
             </li>
         </ul>
 
-        <div class="tab-content">
-            <!-- Tab Phiếu Mượn -->
+
+        <div class="tab-content" style="padding:20px;">
+
+
+            <!-- ========================= -->
+            <!-- TAB PHIẾU MƯỢN -->
+            <!-- ========================= -->
             <div role="tabpanel" class="tab-pane active" id="phieuMuonTab">
-                <div class="row" style="margin-top: 20px;">
-                    <div class="col-md-8">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Tìm kiếm phiếu mượn..." id="searchPhieuMuon">
-                            <span class="input-group-btn">
-                                <button class="btn btn-primary" type="button" id="btnSearchPhieuMuon">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </span>
-                        </div>
-                    </div>
+
+                <div class="row" style="margin-bottom:20px;">
+
+                  
+
+                   
+
                     <div class="col-md-2">
-                        <select class="form-control" id="filterTrangThai">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="Đang mượn">Đang mượn</option>
-                            <option value="Quá hạn">Quá hạn</option>
-                            <option value="Đã trả">Đã trả</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-success btn-block" onclick="window.location.href='@Url.Action("PhieuMuon")'">
+                        <button class="btn btn-success btn-block"
+                                onclick="location.href='@Url.Action("PhieuMuon","MuonTra")'">
                             <i class="fa fa-plus"></i> Tạo phiếu mượn
                         </button>
                     </div>
+
                 </div>
 
-                <!-- Danh sách phiếu mượn -->
-                <div style="margin-top: 20px;">
-                    <div id="loadingPhieuMuon" style="display: none; text-align: center; padding: 20px;">
-                        <i class="fa fa-spinner fa-spin fa-2x"></i>
-                        <p>Đang tải dữ liệu...</p>
-                    </div>
-
-                    <div id="phieuMuonContainer">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Mã phiếu</th>
-                                        <th>Độc giả</th>
-                                        <th>Ngày mượn</th>
-                                        <th>Ngày trả</th>
-                                        <th>Số sách</th>
-                                        <th>Trạng thái</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>PM001</strong></td>
-                                        <td>
-                                            <div>
-                                                <strong>Nguyễn Văn An</strong><br>
-                                                <small class="text-muted">DG001</small>
-                                            </div>
-                                        </td>
-                                        <td>@DateTime.Now.AddDays(-5).ToString("dd/MM/yyyy")</td>
-                                        <td>@DateTime.Now.AddDays(9).ToString("dd/MM/yyyy")</td>
-                                        <td><span class="badge badge-info">3</span></td>
-                                        <td><span class="label label-primary">Đang mượn</span></td>
-                                        <td>
-                                            <button class="btn btn-xs btn-default" title="Xem chi tiết">
-                                                <i class="fa fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-primary" title="Cập nhật">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-danger" title="Xóa">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>PM002</strong></td>
-                                        <td>
-                                            <div>
-                                                <strong>Trần Thị Bình</strong><br>
-                                                <small class="text-muted">DG002</small>
-                                            </div>
-                                        </td>
-                                        <td>@DateTime.Now.AddDays(-10).ToString("dd/MM/yyyy")</td>
-                                        <td>@DateTime.Now.AddDays(-3).ToString("dd/MM/yyyy")</td>
-                                        <td><span class="badge badge-info">2</span></td>
-                                        <td><span class="label label-danger">Quá hạn</span></td>
-                                        <td>
-                                            <button class="btn btn-xs btn-default" title="Xem chi tiết">
-                                                <i class="fa fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-primary" title="Cập nhật">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-danger" title="Xóa">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div id="phieuMuonContainer">
+                    @Html.Partial("_PhieuMuonList", Model)
                 </div>
             </div>
 
-            <!-- Tab Phiếu Trả -->
+
+
+            <!-- ========================= -->
+            <!-- TAB PHIẾU TRẢ -->
+            <!-- ========================= -->
             <div role="tabpanel" class="tab-pane" id="phieuTraTab">
-                <div class="row" style="margin-top: 20px;">
-                    <div class="col-md-10">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Tìm kiếm phiếu trả..." id="searchPhieuTra">
-                            <span class="input-group-btn">
-                                <button class="btn btn-primary" type="button" id="btnSearchPhieuTra">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </span>
-                        </div>
-                    </div>
+
+                <div class="row" style="margin-bottom:20px;">
+
+                   
+
                     <div class="col-md-2">
-                        <button class="btn btn-success btn-block" onclick="window.location.href='@Url.Action("PhieuTra")'">
+                        <button class="btn btn-success btn-block"
+                                onclick="location.href='@Url.Action("PhieuTra","MuonTra")'">
                             <i class="fa fa-plus"></i> Tạo phiếu trả
                         </button>
                     </div>
+
                 </div>
 
-                <!-- Danh sách phiếu trả -->
-                <div style="margin-top: 20px;">
-                    <div id="loadingPhieuTra" style="display: none; text-align: center; padding: 20px;">
-                        <i class="fa fa-spinner fa-spin fa-2x"></i>
-                        <p>Đang tải dữ liệu...</p>
-                    </div>
 
-                    <div id="phieuTraContainer">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Mã phiếu trả</th>
-                                        <th>Mã phiếu mượn</th>
-                                        <th>Độc giả</th>
-                                        <th>Ngày trả</th>
-                                        <th>Số sách</th>
-                                        <th>Tình trạng</th>
-                                        <th>Phí phạt</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>PT001</strong></td>
-                                        <td>PM003</td>
-                                        <td>
-                                            <div>
-                                                <strong>Lê Văn Cường</strong><br>
-                                                <small class="text-muted">DG003</small>
-                                            </div>
-                                        </td>
-                                        <td>@DateTime.Now.AddDays(-1).ToString("dd/MM/yyyy")</td>
-                                        <td><span class="badge badge-info">1</span></td>
-                                        <td><span class="label label-success">Tốt</span></td>
-                                        <td><span class="text-success">0đ</span></td>
-                                        <td>
-                                            <button class="btn btn-xs btn-default" title="Xem chi tiết">
-                                                <i class="fa fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-primary" title="Cập nhật">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-danger" title="Xóa">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>PT002</strong></td>
-                                        <td>PM004</td>
-                                        <td>
-                                            <div>
-                                                <strong>Phạm Thị Dung</strong><br>
-                                                <small class="text-muted">DG004</small>
-                                            </div>
-                                        </td>
-                                        <td>@DateTime.Now.AddDays(-2).ToString("dd/MM/yyyy")</td>
-                                        <td><span class="badge badge-info">2</span></td>
-                                        <td><span class="label label-warning">Hư hỏng nhẹ</span></td>
-                                        <td><span class="text-danger">50,000đ</span></td>
-                                        <td>
-                                            <button class="btn btn-xs btn-default" title="Xem chi tiết">
-                                                <i class="fa fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-primary" title="Cập nhật">
-                                                <i class="fa fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-xs btn-danger" title="Xóa">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div id="phieuTraContainer">
+                    @Html.Partial(
+                        "_PhieuTraList",
+                        ViewBag.DanhSachPhieuTra as IEnumerable<DoAnThuVienNhom12.Models.PhieuTra>
+                    )
                 </div>
+
             </div>
+
+
         </div>
     </div>
+
 </div>
-
-@section Scripts {
-    <script>
-        $(document).ready(function() {
-            // Tab switching
-            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                var target = $(e.target).attr("href");
-                if (target === '#phieuMuonTab') {
-                    loadPhieuMuonData();
-                } else if (target === '#phieuTraTab') {
-                    loadPhieuTraData();
-                }
-            });
-
-            // Tìm kiếm phiếu mượn
-            $('#btnSearchPhieuMuon').click(function() {
-                searchPhieuMuon();
-            });
-
-            $('#searchPhieuMuon').keypress(function(e) {
-                if (e.which == 13) {
-                    searchPhieuMuon();
-                }
-            });
-
-            $('#filterTrangThai').change(function() {
-                searchPhieuMuon();
-            });
-
-            // Tìm kiếm phiếu trả
-            $('#btnSearchPhieuTra').click(function() {
-                searchPhieuTra();
-            });
-
-            $('#searchPhieuTra').keypress(function(e) {
-                if (e.which == 13) {
-                    searchPhieuTra();
-                }
-            });
-
-            function searchPhieuMuon() {
-                var searchTerm = $('#searchPhieuMuon').val();
-                var trangThai = $('#filterTrangThai').val();
-
-                $('#loadingPhieuMuon').show();
-                $('#phieuMuonContainer').hide();
-
-                $.ajax({
-                    url: '@Url.Action("TimKiemPhieuMuon", "MuonTra")',
-                    type: 'POST',
-                    data: { 
-                        searchTerm: searchTerm,
-                        trangThai: trangThai
-                    },
-                    success: function(data) {
-                        $('#phieuMuonContainer').html(data);
-                        $('#loadingPhieuMuon').hide();
-                        $('#phieuMuonContainer').show();
-                    },
-                    error: function() {
-                        $('#loadingPhieuMuon').hide();
-                        $('#phieuMuonContainer').show();
-                        showToast('error', 'Có lỗi xảy ra khi tìm kiếm!');
-                    }
-                });
-            }
-
-            function searchPhieuTra() {
-                var searchTerm = $('#searchPhieuTra').val();
-
-                $('#loadingPhieuTra').show();
-                $('#phieuTraContainer').hide();
-
-                $.ajax({
-                    url: '@Url.Action("TimKiemPhieuTra", "MuonTra")',
-                    type: 'POST',
-                    data: { searchTerm: searchTerm },
-                    success: function(data) {
-                        $('#phieuTraContainer').html(data);
-                        $('#loadingPhieuTra').hide();
-                        $('#phieuTraContainer').show();
-                    },
-                    error: function() {
-                        $('#loadingPhieuTra').hide();
-                        $('#phieuTraContainer').show();
-                        showToast('error', 'Có lỗi xảy ra khi tìm kiếm!');
-                    }
-                });
-            }
-
-            function loadPhieuMuonData() {
-                // Load dữ liệu phiếu mượn
-                console.log('Loading phiếu mượn data...');
-            }
-
-            function loadPhieuTraData() {
-                // Load dữ liệu phiếu trả
-                console.log('Loading phiếu trả data...');
-            }
-
-            function showToast(type, message) {
-                var alertClass = type === 'success' ? 'alert-success' : 
-                                type === 'error' ? 'alert-danger' : 'alert-warning';
-                
-                var toast = $(`
-                    <div class="alert ${alertClass} alert-dismissible" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        ${message}
-                    </div>
-                `);
-                
-                $('body').append(toast);
-                
-                setTimeout(function() {
-                    toast.fadeOut(function() {
-                        $(this).remove();
-                    });
-                }, 3000);
-            }
-
-            // Load initial data
-            loadPhieuMuonData();
-        });
-    </script>
-}

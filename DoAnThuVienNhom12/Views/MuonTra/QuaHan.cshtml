@@ -1,0 +1,87 @@
+﻿@model IEnumerable<DoAnThuVienNhom12.Models.PhieuMuon>
+
+@{
+    ViewBag.Title = "Danh sách quá hạn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="panel panel-danger" style="margin-top:20px;">
+    <div class="panel-heading">
+        <h3 style="margin:0;">
+            <i class="fa fa-clock-o"></i> Danh sách phiếu mượn quá hạn
+        </h3>
+    </div>
+
+    <div class="panel-body">
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> Hiện không có độc giả nào quá hạn trả sách.
+            </div>
+        }
+        else
+        {
+            <table class="table table-bordered table-striped table-hover">
+                <thead style="background:#fdecea;">
+                    <tr>
+                        <th style="width:90px;" class="text-center">Mã phiếu</th>
+                        <th>Độc giả</th>
+                        <th style="width:130px;" class="text-center">Ngày mượn</th>
+                        <th style="width:130px;" class="text-center">Hạn trả</th>
+                        <th style="width:120px;" class="text-center">Số ngày trễ</th>
+                        <th style="width:80px;" class="text-center">SL sách</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        // EF5: dùng biến trung gian cho DocGia
+                        var docGia = p.DocGia;
+
+                        // Tính số ngày trễ
+                        int soNgayTre = 0;
+                        if (p.NgayHenTra.HasValue && p.NgayHenTra.Value.Date < DateTime.Now.Date)
+                        {
+                            soNgayTre = (DateTime.Now.Date - p.NgayHenTra.Value.Date).Days;
+                        }
+
+                        <tr>
+                            <td class="text-center">
+                                <strong>@p.MaPhieuMuon</strong>
+                            </td>
+
+                            <td>
+                                <strong>@(docGia != null ? docGia.HoTen : "Không rõ")</strong><br />
+                                <span class="text-muted">
+                                    MSSV: @(docGia != null ? docGia.MaSinhVien : "")
+                                </span>
+                            </td>
+
+                            <td class="text-center">
+                                @(p.NgayMuon.HasValue
+                                    ? p.NgayMuon.Value.ToString("dd/MM/yyyy")
+                                    : "")
+                            </td>
+
+                            <td class="text-center">
+                                @(p.NgayHenTra.HasValue
+                                    ? p.NgayHenTra.Value.ToString("dd/MM/yyyy")
+                                    : "")
+                            </td>
+
+                            <td class="text-center">
+                                <span class="label label-danger" style="font-size:13px;">
+                                    @soNgayTre ngày
+                                </span>
+                            </td>
+
+                            <td class="text-center">@p.SoLuongSach</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

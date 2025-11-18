@@ -1,0 +1,82 @@
+﻿@model IEnumerable<DoAnThuVienNhom12.Models.PhieuMuon>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Mã phiếu</th>
+            <th>Độc giả</th>
+            <th>MSSV</th>
+            <th>Ngày mượn</th>
+            <th>Hạn trả</th>
+            <th>Trạng thái</th>
+            <th>Số sách</th>
+            <th style="width:90px;">Thao tác</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var p in Model)
+        {
+            var docGia = p.DocGia;
+
+            <tr>
+                <td>@p.MaPhieuMuon</td>
+
+                <td>@(docGia?.HoTen ?? "Không rõ")</td>
+
+                <td>@(docGia?.MaSinhVien ?? "")</td>
+
+                <td>@(p.NgayMuon?.ToString("dd/MM/yyyy") ?? "")</td>
+
+                <td>@(p.NgayHenTra?.ToString("dd/MM/yyyy") ?? "")</td>
+
+                <td>
+                    @if (p.TrangThai == "Đang mượn")
+                    {
+                        <span class="label label-primary">Đang mượn</span>
+                    }
+                    else if (p.TrangThai == "Quá hạn")
+                    {
+                        <span class="label label-danger">Quá hạn</span>
+                    }
+                    else if (p.TrangThai == "Đã trả")
+                    {
+                        <span class="label label-success">Đã trả</span>
+                    }
+                    else
+                    {
+                        @p.TrangThai
+                    }
+                </td>
+
+                <td>@p.SoLuongSach</td>
+
+                <td class="text-center">
+                    <button class="btn btn-danger btn-sm" onclick="xoaPhieuMuon(@p.MaPhieuMuon)">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+   function xoaPhieuMuon(id) {
+    if (!confirm("Xóa phiếu mượn #" + id + " ?")) return;
+
+    $.ajax({
+        url: '@Url.Action("XoaPhieuMuon","MuonTra")',
+        type: "POST",
+        data: { MaPhieuMuon: id },
+        success: function (res) {
+            alert(res.message);
+            if (res.success) location.reload();
+        },
+        error: function () {
+            alert("Không thể kết nối server!");
+        }
+    });
+}
+
+</script>

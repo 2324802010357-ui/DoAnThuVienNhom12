@@ -1,206 +1,467 @@
-﻿using System;
+﻿using DoAnThuVienNhom12.Filters;
+using DoAnThuVienNhom12.Models;
+using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace DoAnThuVienNhom12.Controllers
 {
+    [AuthorizeRole("Admin", "Thủ thư")]
     public class MuonTraController : Controller
     {
-        // Dữ liệu mẫu phiếu mượn
-        private static List<PhieuMuonModel> _phieuMuons = new List<PhieuMuonModel>
-        {
-            new PhieuMuonModel { MaPhieu = "PM001", MaDocGia = "DG001", TenDocGia = "Nguyễn Văn An", NgayMuon = DateTime.Now.AddDays(-5), NgayTra = DateTime.Now.AddDays(9), TrangThai = "Đang mượn", SoLuongSach = 3 },
-            new PhieuMuonModel { MaPhieu = "PM002", MaDocGia = "DG002", TenDocGia = "Trần Thị Bình", NgayMuon = DateTime.Now.AddDays(-10), NgayTra = DateTime.Now.AddDays(-3), TrangThai = "Quá hạn", SoLuongSach = 2 },
-            new PhieuMuonModel { MaPhieu = "PM003", MaDocGia = "DG003", TenDocGia = "Lê Văn Cường", NgayMuon = DateTime.Now.AddDays(-15), NgayTra = DateTime.Now.AddDays(-1), TrangThai = "Đã trả", SoLuongSach = 1 }
-        };
+        private readonly DoAnThuVienNhom12Entities db = new DoAnThuVienNhom12Entities();
 
-        private static List<PhieuTraModel> _phieuTras = new List<PhieuTraModel>
-        {
-            new PhieuTraModel { MaPhieu = "PT001", MaPhieuMuon = "PM003", MaDocGia = "DG003", TenDocGia = "Lê Văn Cường", NgayTra = DateTime.Now.AddDays(-1), SoSachTra = 1, TinhTrangSach = "Tốt", PhiPhat = 0 },
-            new PhieuTraModel { MaPhieu = "PT002", MaPhieuMuon = "PM004", MaDocGia = "DG004", TenDocGia = "Phạm Thị Dung", NgayTra = DateTime.Now.AddDays(-2), SoSachTra = 2, TinhTrangSach = "Hư hỏng nhẹ", PhiPhat = 50000 }
-        };
-
-        // 1. Quản lý mượn - Trang chính
+        // ============================
+        // DASHBOARD
+        // ============================
         public ActionResult Index()
         {
-            ViewBag.Title = "Quản lý mượn trả";
-            return View();
+            var now = DateTime.Now.Date;
+
+            var overdue = db.PhieuMuons
+                .Where(p => p.TrangThai == "Đang mượn" && p.NgayHenTra < now)
+                .ToList();
+
+            foreach (var p in overdue)
+                p.TrangThai = "Quá hạn";
+
+            if (overdue.Any())
+                db.SaveChanges();
+
+            ViewBag.DangMuon = db.PhieuMuons.Count(p => p.TrangThai == "Đang mượn");
+            ViewBag.QuaHan = db.PhieuMuons.Count(p => p.TrangThai == "Quá hạn");
+            ViewBag.DaTra = db.PhieuMuons.Count(p => p.TrangThai == "Đã trả");
+            ViewBag.PhiPhat = db.PhieuTras.Sum(p => (decimal?)p.TienPhat) ?? 0;
+
+            var muon = db.PhieuMuons
+                .Include("DocGia")
+                .OrderByDescending(p => p.NgayMuon)
+                .ToList();
+
+            ViewBag.DanhSachPhieuTra = db.PhieuTras
+                .Include("PhieuMuon")
+                .Include("PhieuMuon.DocGia")
+                .OrderByDescending(p => p.NgayTra)
+                .ToList();
+
+            return View(muon);
         }
 
-        // Tạo phiếu mượn
-        public ActionResult PhieuMuon()
+        public ActionResult PhieuMuon() => View();
+        public ActionResult PhieuTra() => View();
+
+
+        // ============================
+        // ĐANG MƯỢN
+        // ============================
+        public ActionResult DangMuon()
         {
-            ViewBag.Title = "Tạo phiếu mượn";
-            return View();
+            var list = db.PhieuMuons
+                .Include("DocGia")
+                .Where(p => p.TrangThai == "Đang mượn")
+                .OrderByDescending(p => p.NgayMuon)
+                .ToList();
+
+            return View(list);
         }
 
-        // Cập nhật phiếu mượn  
+        // ============================
+        // QUÁ HẠN
+        // ============================
+        public ActionResult QuaHan()
+        {
+            var list = db.PhieuMuons
+                .Include("DocGia")
+                .Where(p => p.TrangThai == "Quá hạn")
+                .OrderBy(p => p.NgayHenTra)
+                .ToList();
+
+            return View(list);
+        }
+
+        // ============================
+        // ĐÃ TRẢ
+        // ============================
+        public ActionResult DaTraDanhSach()
+        {
+            var list = db.PhieuTras
+                .Include("PhieuMuon")
+                .Include("PhieuMuon.DocGia")
+                .OrderByDescending(p => p.NgayTra)
+                .ToList();
+
+            return View(list);
+        }
+
+        // ============================
+        // PHÍ PHẠT
+        // ============================
+        public ActionResult PhiPhat()
+        {
+            var list = db.PhieuTras
+                .Include("PhieuMuon")
+                .Include("PhieuMuon.DocGia")
+                .Where(p => p.TienPhat > 0)
+                .OrderByDescending(p => p.NgayTra)
+                .ToList();
+
+            return View(list);
+        }
+
+        // ============================
+        // AJAX: Danh sách phiếu trả
+        // ============================
+        public ActionResult DanhSachPhieuTra(string search)
+        {
+            IQueryable<PhieuTra> q = db.PhieuTras
+                .Include("PhieuMuon")
+                .Include("PhieuMuon.DocGia");
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                q = q.Where(p =>
+                    p.MaPhieuTra.ToString().Contains(search) ||
+                    p.PhieuMuon.DocGia.HoTen.Contains(search));
+            }
+
+            return PartialView("_PhieuTraList", q.OrderByDescending(p => p.NgayTra).ToList());
+        }
+        // ============================
+        // AJAX: Tìm phiếu mượn (autocomplete)
+        // ============================
+        public ActionResult TimPhieuMuon(string term)
+        {
+            int id = 0;
+            int.TryParse(term, out id);
+
+            // BƯỚC 1: Lọc database KHÔNG dùng ToString()
+            var query = db.PhieuMuons
+                .Where(p => p.MaPhieuMuon == id)
+                .OrderByDescending(p => p.NgayMuon)
+                .Take(10)
+                .ToList();   // <-- từ đây trở đi dùng ToString thoải mái
+
+            // BƯỚC 2: Sau khi ToList, mới được dùng ToString()
+            var list = query.Select(p => new
+            {
+                label = p.MaPhieuMuon.ToString(),
+                value = p.MaPhieuMuon.ToString()
+            });
+
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+
+
+
+
+
+        // ============================
+        // AJAX: LẤY THÔNG TIN SÁCH (ĐÃ FIX CHUẨN)
+        // ============================
+        public ActionResult LayThongTinSach(int maSach)
+        {
+            var s = db.Saches
+                .Include("TacGia")
+                .Include("NhaXuatBan")
+                .FirstOrDefault(x => x.MaSach == maSach);
+
+            if (s == null)
+                return Json(new { success = false }, JsonRequestBehavior.AllowGet);
+
+            return Json(new
+            {
+                success = true,
+                title = s.TenSach,
+                author = s.TacGia?.TenTacGia ?? "",
+                publisher = s.NhaXuatBan?.TenNXB ?? ""
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+
+
+        // ============================
+        // AJAX: LẤY SÁCH TỪ PHIẾU MƯỢN (ĐÃ FIX FULL)
+        // ============================
+        public ActionResult LaySachTuPhieuMuon(int maPhieu)
+        {
+            var pm = db.PhieuMuons
+                .Include("DocGia")
+                .Include("ChiTietPhieuMuons.Sach")
+                .FirstOrDefault(p => p.MaPhieuMuon == maPhieu);
+
+            if (pm == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Không tìm thấy phiếu mượn!"
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            var books = pm.ChiTietPhieuMuons.Select(c => new
+            {
+                code = c.MaSach.ToString(),
+                title = c.Sach.TenSach,
+                author = c.Sach.TacGia,
+                publisher = c.Sach.NhaXuatBan
+            }).ToList();
+
+            return Json(new
+            {
+                success = true,
+                reader = pm.DocGia.HoTen,
+                dueDate = pm.NgayHenTra?.ToString("yyyy-MM-dd"),
+                books = books
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+
+
+
+        // ============================
+        // SAVE PHIẾU MƯỢN
+        // ============================
         [HttpPost]
-        public ActionResult CapNhatPhieuMuon(PhieuMuonModel model)
+        public ActionResult SavePhieuMuon(PhieuMuonPayload req)
         {
             try
             {
-                var phieu = _phieuMuons.FirstOrDefault(p => p.MaPhieu == model.MaPhieu);
-                if (phieu != null)
+                if (req == null || string.IsNullOrEmpty(req.studentId))
+                    return Json(new { success = false, message = "Thiếu dữ liệu!" });
+
+                var dg = db.DocGias.FirstOrDefault(x => x.MaSinhVien == req.studentId);
+
+                if (dg == null)
                 {
-                    phieu.NgayTra = model.NgayTra;
-                    phieu.TrangThai = model.TrangThai;
-                    return Json(new { success = true, message = "Cập nhật phiếu mượn thành công!" });
+                    dg = new DocGia
+                    {
+                        HoTen = req.studentName,
+                        MaSinhVien = req.studentId,
+                        
+                    };
+                    db.DocGias.Add(dg);
+                    db.SaveChanges();
                 }
-                return Json(new { success = false, message = "Không tìm thấy phiếu mượn!" });
+
+                var pm = new PhieuMuon
+                {
+                    MaDocGia = dg.MaDocGia,
+                    NgayMuon = DateTime.Parse(req.borrowDate),
+                    NgayHenTra = DateTime.Parse(req.dueDate),
+                    TrangThai = "Đang mượn",
+                    SoLuongSach = req.books.Count
+                };
+
+                db.PhieuMuons.Add(pm);
+                db.SaveChanges();
+
+                foreach (var code in req.books)
+                {
+                    int ma = int.Parse(code);
+
+                    db.ChiTietPhieuMuons.Add(new ChiTietPhieuMuon
+                    {
+                        MaPhieuMuon = pm.MaPhieuMuon,
+                        MaSach = ma,
+                        SoLuong = 1
+                    });
+
+                    var sach = db.Saches.Find(ma);
+                    if (sach != null)
+                        sach.SoLuongCoSan--;
+                }
+
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Tạo phiếu mượn thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
-        // Tìm kiếm phiếu mượn
+
+        // ============================
+        // SAVE PHIẾU TRẢ
+        // ============================
         [HttpPost]
-        public ActionResult TimKiemPhieuMuon(string searchTerm, string trangThai)
-        {
-            var result = _phieuMuons.AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                result = result.Where(p => 
-                    p.MaPhieu.Contains(searchTerm) ||
-                    p.MaDocGia.Contains(searchTerm) ||
-                    p.TenDocGia.ToLower().Contains(searchTerm.ToLower())
-                );
-            }
-
-            if (!string.IsNullOrEmpty(trangThai) && trangThai != "Tất cả")
-            {
-                result = result.Where(p => p.TrangThai == trangThai);
-            }
-
-            return PartialView("_PhieuMuonList", result.ToList());
-        }
-
-        // Xóa phiếu mượn
-        [HttpPost]
-        public ActionResult XoaPhieuMuon(string maPhieu)
+        public ActionResult SavePhieuTra(PhieuTraPayload req)
         {
             try
             {
-                var phieu = _phieuMuons.FirstOrDefault(p => p.MaPhieu == maPhieu);
-                if (phieu != null)
+                if (req == null)
+                    return Json(new { success = false, message = "Thiếu dữ liệu!" });
+
+                // FIX: nếu books null thì tạo danh sách rỗng
+                if (req.books == null)
+                    req.books = new System.Collections.Generic.List<ReturnBookPayload>();
+
+                var pm = db.PhieuMuons
+                    .Include("ChiTietPhieuMuons")
+                    .FirstOrDefault(x => x.MaPhieuMuon == req.borrowId);
+
+                if (pm == null)
+                    return Json(new { success = false, message = "Không tìm thấy phiếu mượn!" });
+
+                DateTime ngayTra = DateTime.Parse(req.returnDate);
+
+                // TÍNH TRỄ HẠN
+                int soNgayTre = 0;
+                int tienTre = 0;
+
+                if (pm.NgayHenTra.HasValue && ngayTra.Date > pm.NgayHenTra.Value.Date)
                 {
-                    _phieuMuons.Remove(phieu);
-                    return Json(new { success = true, message = "Xóa phiếu mượn thành công!" });
+                    soNgayTre = (ngayTra.Date - pm.NgayHenTra.Value.Date).Days;
+                    tienTre = soNgayTre * 2000;
                 }
-                return Json(new { success = false, message = "Không tìm thấy phiếu mượn!" });
+
+                // TÍNH HƯ HỎNG
+                int tienHu = 0;
+
+                foreach (var b in req.books)
+                {
+                    if (b.status == "Hư hỏng nhẹ") tienHu += 10000;
+                    else if (b.status == "Mất sách") tienHu += 50000;
+                }
+
+
+                // TẠO PHIẾU TRẢ
+                var pt = new PhieuTra
+                {
+                    MaPhieuMuon = pm.MaPhieuMuon,
+                    NgayTra = ngayTra,
+                    SoNgayTre = soNgayTre,
+                    TienPhat = tienTre + tienHu,
+                    GhiChu = tienHu > 0 ? "Sách hư hỏng" : ""
+                };
+
+                db.PhieuTras.Add(pt);
+
+                // CẬP NHẬT SỐ LƯỢNG SÁCH
+                foreach (var b in req.books)
+                {
+                    int maSach = int.Parse(b.code);
+
+                    var sach = db.Saches.Find(maSach);
+                    if (sach != null && b.status != "Mất sách")
+                        sach.SoLuongCoSan++;
+                }
+
+                pm.TrangThai = "Đã trả";
+
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Xác nhận trả sách thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
-        // 2. Quản lý trả
-        public ActionResult PhieuTra()
-        {
-            ViewBag.Title = "Tạo phiếu trả";
-            return View();
-        }
 
-        // Cập nhật phiếu trả
-        [HttpPost] 
-        public ActionResult CapNhatPhieuTra(PhieuTraModel model)
+
+        // ============================
+        // XÓA PHIẾU TRẢ
+        // ============================
+        [HttpPost]
+        public ActionResult XoaPhieuTra(int MaPhieuTra)
+        {
+            var pt = db.PhieuTras.Find(MaPhieuTra);
+            if (pt == null)
+                return Json(new { success = false, message = "Không tìm thấy!" });
+
+            db.PhieuTras.Remove(pt);
+            db.SaveChanges();
+
+            return Json(new { success = true, message = "Xóa phiếu trả thành công!" });
+        }
+        [HttpPost]
+        public ActionResult XoaPhieuMuon(int MaPhieuMuon)
         {
             try
             {
-                var phieu = _phieuTras.FirstOrDefault(p => p.MaPhieu == model.MaPhieu);
-                if (phieu != null)
+                var pm = db.PhieuMuons.Find(MaPhieuMuon);
+                if (pm == null)
+                    return Json(new { success = false, message = "Phiếu mượn không tồn tại!" });
+
+                // Nếu phiếu đang mượn → không cho xóa
+                if (pm.TrangThai == "Đang mượn" || pm.TrangThai == "Quá hạn")
                 {
-                    phieu.TinhTrangSach = model.TinhTrangSach;
-                    phieu.PhiPhat = model.PhiPhat;
-                    return Json(new { success = true, message = "Cập nhật phiếu trả thành công!" });
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Phiếu mượn đang mượn sách – không thể xóa!"
+                    });
                 }
-                return Json(new { success = false, message = "Không tìm thấy phiếu trả!" });
+
+                // Nếu đã trả thì xóa Phiếu Trả trước
+                var phieuTra = db.PhieuTras.FirstOrDefault(x => x.MaPhieuMuon == MaPhieuMuon);
+                if (phieuTra != null)
+                {
+                    db.PhieuTras.Remove(phieuTra);
+                }
+
+                // Xóa Chi tiết phiếu mượn
+                var chitiets = db.ChiTietPhieuMuons.Where(x => x.MaPhieuMuon == MaPhieuMuon).ToList();
+                foreach (var ct in chitiets)
+                {
+                    db.ChiTietPhieuMuons.Remove(ct);
+                }
+
+                // Xóa phiếu mượn
+                db.PhieuMuons.Remove(pm);
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Đã xóa phiếu mượn thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+                return Json(new { success = false, message = "Lỗi server: " + ex.Message });
             }
         }
+       
 
-        // Tìm kiếm phiếu trả
-        [HttpPost]
-        public ActionResult TimKiemPhieuTra(string searchTerm)
+
+
+
+
+
+        // ============================
+        // PAYLOAD MODELS
+        // ============================
+        public class PhieuMuonPayload
         {
-            var result = _phieuTras.AsQueryable();
+            public string studentName { get; set; }
+            public string studentId { get; set; }
+            public string classId { get; set; }
+            public string borrowDate { get; set; }
+            public string dueDate { get; set; }
+            public System.Collections.Generic.List<string> books { get; set; }
+        }
 
-            if (!string.IsNullOrEmpty(searchTerm))
+        public class PhieuTraPayload
+        {
+            public PhieuTraPayload()
             {
-                result = result.Where(p => 
-                    p.MaPhieu.Contains(searchTerm) ||
-                    p.MaDocGia.Contains(searchTerm) ||
-                    p.TenDocGia.ToLower().Contains(searchTerm.ToLower())
-                );
+                books = new List<ReturnBookPayload>();
             }
 
-            return PartialView("_PhieuTraList", result.ToList());
+            public int borrowId { get; set; }
+            public string returnDate { get; set; }
+            public List<ReturnBookPayload> books { get; set; }
         }
 
-        // Xóa phiếu trả
-        [HttpPost]
-        public ActionResult XoaPhieuTra(string maPhieu)
+
+        public class ReturnBookPayload
         {
-            try
-            {
-                var phieu = _phieuTras.FirstOrDefault(p => p.MaPhieu == maPhieu);
-                if (phieu != null)
-                {
-                    _phieuTras.Remove(phieu);
-                    return Json(new { success = true, message = "Xóa phiếu trả thành công!" });
-                }
-                return Json(new { success = false, message = "Không tìm thấy phiếu trả!" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
-            }
+            public string code { get; set; }
+            public string status { get; set; }
+            public int fine { get; set; }
         }
-
-        // API lấy dữ liệu
-        [HttpGet]
-        public ActionResult GetPhieuMuonData()
-        {
-            return Json(_phieuMuons, JsonRequestBehavior.AllowGet);
-        }
-
-        [HttpGet]
-        public ActionResult GetPhieuTraData()
-        {
-            return Json(_phieuTras, JsonRequestBehavior.AllowGet);
-        }
-    }
-
-    // Models
-    public class PhieuMuonModel
-    {
-        public string MaPhieu { get; set; }
-        public string MaDocGia { get; set; }
-        public string TenDocGia { get; set; }
-        public DateTime NgayMuon { get; set; }
-        public DateTime NgayTra { get; set; }
-        public string TrangThai { get; set; }
-        public int SoLuongSach { get; set; }
-    }
-
-    public class PhieuTraModel
-    {
-        public string MaPhieu { get; set; }
-        public string MaPhieuMuon { get; set; }
-        public string MaDocGia { get; set; }
-        public string TenDocGia { get; set; }
-        public DateTime NgayTra { get; set; }
-        public int SoSachTra { get; set; }
-        public string TinhTrangSach { get; set; }
-        public decimal PhiPhat { get; set; }
     }
 }

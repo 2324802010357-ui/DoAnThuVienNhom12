@@ -1,0 +1,12 @@
+﻿@{
+    ViewBag.Title = "Không có quyền truy cập";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container text-center mt-5">
+    <i class="fa fa-ban fa-5x text-danger"></i>
+    <h2>Bạn không có quyền truy cập trang này!</h2>
+    <p>Vui lòng quay lại <a href="@Url.Action("Index", "Home")">trang chủ</a> hoặc đăng nhập tài khoản có quyền cao hơn.</p>
+</div>
+
+

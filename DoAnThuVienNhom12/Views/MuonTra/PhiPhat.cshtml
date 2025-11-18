@@ -1,0 +1,82 @@
+﻿@model IEnumerable<DoAnThuVienNhom12.Models.PhieuTra>
+
+@{
+    ViewBag.Title = "Danh sách phí phạt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="panel panel-warning" style="margin-top:20px;">
+    <div class="panel-heading">
+        <h3 style="margin:0;">
+            <i class="fa fa-money"></i> Danh sách phí phạt
+        </h3>
+    </div>
+
+    <div class="panel-body">
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> Hiện chưa có độc giả nào bị phạt.
+            </div>
+        }
+        else
+        {
+            <table class="table table-bordered table-hover">
+                <thead style="background:#fff4d6;">
+                    <tr>
+                        <th>Độc giả</th>
+                        <th style="width:120px;" class="text-center">Mã phiếu trả</th>
+                        <th style="width:120px;" class="text-center">Mã phiếu mượn</th>
+                        <th style="width:130px;" class="text-center">Ngày trả</th>
+                        <th style="width:130px;" class="text-right">Tiền phạt</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        // EF5 → dùng biến để tránh lỗi null navigation
+                        var phieuMuon = p.PhieuMuon;
+                        var docGia = (phieuMuon != null ? phieuMuon.DocGia : null);
+
+                        <tr>
+                            <!-- Độc giả -->
+                            <td>
+                                <strong>@(docGia != null ? docGia.HoTen : "Không rõ")</strong><br />
+                                <span class="text-muted">
+                                    MSSV: @(docGia != null ? docGia.MaSinhVien : "")
+                                </span>
+                            </td>
+
+                            <!-- Mã phiếu trả -->
+                            <td class="text-center">
+                                <strong>@p.MaPhieuTra</strong>
+                            </td>
+
+                            <!-- Mã phiếu mượn -->
+                            <td class="text-center">@p.MaPhieuMuon</td>
+
+                            <!-- Ngày trả -->
+                            <td class="text-center">
+                                @(p.NgayTra.HasValue
+                                    ? p.NgayTra.Value.ToString("dd/MM/yyyy")
+                                    : "")
+                            </td>
+
+                            <!-- Tiền phạt -->
+                            <td class="text-right">
+                                <strong>@String.Format("{0:N0} đ", p.TienPhat)</strong>
+                            </td>
+
+                            <!-- Ghi chú -->
+                            <td>@(string.IsNullOrEmpty(p.GhiChu) ? "Không có" : p.GhiChu)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+    </div>
+</div>

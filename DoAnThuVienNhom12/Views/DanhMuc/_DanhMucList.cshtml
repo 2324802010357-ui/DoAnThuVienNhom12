@@ -1,9 +1,9 @@
-﻿@model List<DoAnThuVienNhom12.Controllers.DanhMucSachModel>
+﻿@model List<DoAnThuVienNhom12.Models.DanhMucSachModel>
 
 <div class="table-responsive">
-    <table class="table table-hover">
+    <table class="table table-hover table-bordered">
         <thead>
-            <tr>
+            <tr class="bg-primary text-white">
                 <th>Mã Danh Mục</th>
                 <th>Tên Danh Mục</th>
                 <th>Mô Tả</th>
@@ -17,24 +17,13 @@
             {
                 foreach (var danhMuc in Model)
                 {
-                    <tr data-category-id="@danhMuc.MaDanhMuc">
+                    <tr>
                         <td><strong>@danhMuc.MaDanhMuc</strong></td>
-                        <td>
-                            <div class="media">
-                                <div class="media-left">
-                                    <div class="category-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">
-                                        <i class="fa fa-folder"></i>
-                                    </div>
-                                </div>
-                                <div class="media-body">
-                                    <strong>@danhMuc.TenDanhMuc</strong>
-                                </div>
-                            </div>
-                        </td>
+                        <td><i class="fa fa-folder text-info"></i> @danhMuc.TenDanhMuc</td>
                         <td>@danhMuc.MoTa</td>
                         <td><span class="badge badge-info">@danhMuc.SoLuongSach</span></td>
                         <td>
-                            @if (danhMuc.TrangThai == "Hoat Dong")
+                            @if (danhMuc.TrangThai == "Hoạt động")
                             {
                                 <span class="label label-success">@danhMuc.TrangThai</span>
                             }
@@ -43,16 +32,16 @@
                                 <span class="label label-warning">@danhMuc.TrangThai</span>
                             }
                         </td>
-                        <td>
-                            <button class="btn btn-xs btn-primary btn-edit-category" 
-                                    title="Sửa Danh Mục" 
-                                    data-category-id="@danhMuc.MaDanhMuc">
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary btn-edit-category"
+                                    data-category-id="@danhMuc.MaDanhMuc"
+                                    title="Sửa danh mục">
                                 <i class="fa fa-edit"></i>
                             </button>
-                            <button class="btn btn-xs btn-danger btn-delete-category" 
-                                    title="Xóa Danh Mục" 
+                            <button class="btn btn-sm btn-danger btn-delete-category"
                                     data-category-id="@danhMuc.MaDanhMuc"
-                                    data-category-name="@danhMuc.TenDanhMuc">
+                                    data-category-name="@danhMuc.TenDanhMuc"
+                                    title="Xóa danh mục">
                                 <i class="fa fa-trash"></i>
                             </button>
                         </td>
@@ -62,10 +51,8 @@
             else
             {
                 <tr>
-                    <td colspan="6" class="text-center">
-                        <div class="alert alert-info" style="margin: 20px;">
-                            <i class="fa fa-search"></i> Kh?ng t?m th?y danh m?c n?o ph? h?p v?i t? kh?a t?m ki?m
-                        </div>
+                    <td colspan="6" class="text-center text-muted">
+                        <i class="fa fa-info-circle"></i> Không có danh mục nào được tìm thấy.
                     </td>
                 </tr>
             }
@@ -74,22 +61,122 @@
 </div>
 
 <style>
-    .category-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 16px;
-        margin-right: 10px;
-    }
-    
     .badge-info {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea, #764ba2);
         border-radius: 12px;
         padding: 4px 8px;
         font-size: 12px;
     }
 </style>
+
+@section Scripts {
+    <script>
+    // ==========================
+    // SỬA DANH MỤC
+    // ==========================
+    $(document).on('click', '.btn-edit-category', function () {
+        const id = $(this).data('category-id');
+
+        $.ajax({
+            url: '@Url.Action("GetDanhMuc", "DanhMuc")',
+            type: 'GET',
+            data: { maDanhMuc: id },
+            success: function (res) {
+                if (res.success) {
+                    const d = res.data;
+                    $('#editMaDanhMuc').val(d.MaDanhMuc);
+                    $('#editTenDanhMuc').val(d.TenDanhMuc);
+                    $('#editMoTa').val(d.MoTa);
+                    $('#editTrangThai').val(d.TrangThai);
+                    $('#editCategoryModal').modal('show');
+                } else {
+                    alert(res.message);
+                }
+            },
+            error: function () {
+                alert("Không thể tải thông tin danh mục!");
+            }
+        });
+    });
+
+    // ==========================
+    // XÓA DANH MỤC
+    // ==========================
+    $(document).on('click', '.btn-delete-category', function () {
+        const id = $(this).data('category-id');
+        const name = $(this).data('category-name');
+
+        if (confirm('Bạn có chắc chắn muốn xóa danh mục "' + name + '" không?')) {
+            $.ajax({
+                url: '@Url.Action("XoaDanhMuc", "DanhMuc")',
+                type: 'POST',
+                data: { maDanhMuc: id },
+                success: function (res) {
+                    alert(res.message);
+                    if (res.success) {
+                        location.reload(); // Hoặc có thể gọi lại hàm refreshCategoryList() nếu dùng AJAX load
+                    }
+                },
+                error: function () {
+                    alert("Không thể kết nối đến máy chủ!");
+                }
+            });
+        }
+    });
+
+    // ==========================
+    // THÊM DANH MỤC (KHI DÙNG MODAL CHÍNH)
+    // ==========================
+    $('#btnAddCategory').click(function () {
+        const data = {
+            TenDanhMuc: $('#addCategoryModal input[name="TenDanhMuc"]').val(),
+            MoTa: $('#addCategoryModal textarea[name="MoTa"]').val(),
+            TrangThai: $('#addCategoryModal select[name="TrangThai"]').val()
+        };
+
+        $.ajax({
+            url: '@Url.Action("ThemDanhMuc", "DanhMuc")',
+            type: 'POST',
+            data: data,
+            success: function (res) {
+                alert(res.message);
+                if (res.success) {
+                    $('#addCategoryModal').modal('hide');
+                    location.reload();
+                }
+            },
+            error: function () {
+                alert("Không thể kết nối đến máy chủ!");
+            }
+        });
+    });
+
+    // ==========================
+    // CẬP NHẬT DANH MỤC
+    // ==========================
+    $('#btnEditCategory').click(function () {
+        const data = {
+            MaDanhMuc: $('#editMaDanhMuc').val(),
+            TenDanhMuc: $('#editTenDanhMuc').val(),
+            MoTa: $('#editMoTa').val(),
+            TrangThai: $('#editTrangThai').val()
+        };
+
+        $.ajax({
+            url: '@Url.Action("SuaThongTinDanhMuc", "DanhMuc")',
+            type: 'POST',
+            data: data,
+            success: function (res) {
+                alert(res.message);
+                if (res.success) {
+                    $('#editCategoryModal').modal('hide');
+                    location.reload();
+                }
+            },
+            error: function () {
+                alert("Không thể cập nhật danh mục!");
+            }
+        });
+    });
+    </script>
+}

@@ -1,0 +1,120 @@
+﻿@model DoAnThuVienNhom12.Models.Sach
+@{
+    ViewBag.Title = "Thêm sách";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2><i class="fa fa-plus-circle"></i> Thêm sách mới</h2>
+<hr />
+
+@using (Html.BeginForm("Create", "Sach", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+
+        <!-- Tên sách -->
+        <div class="form-group">
+            @Html.LabelFor(m => m.TenSach, "Tên sách", new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.TenSach, new { @class = "form-control", placeholder = "Nhập tên sách..." })
+            </div>
+        </div>
+
+        <!-- Danh mục -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Danh mục</label>
+            <div class="col-md-10">
+                @Html.DropDownList("MaDanhMuc", (SelectList)ViewBag.MaDanhMuc, "-- Chọn danh mục --", new { @class = "form-control" })
+            </div>
+        </div>
+
+        <!-- Tác giả -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Tác giả</label>
+            <div class="col-md-10">
+                @Html.DropDownList("MaTacGia", (SelectList)ViewBag.MaTacGia, "-- Chọn tác giả --", new { @class = "form-control" })
+            </div>
+        </div>
+
+        <!-- Nhà xuất bản -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Nhà xuất bản</label>
+            <div class="col-md-10">
+                @Html.DropDownList("MaNXB", (SelectList)ViewBag.MaNXB, "-- Chọn NXB --", new { @class = "form-control" })
+            </div>
+        </div>
+
+        <!-- Kệ sách -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Kệ sách</label>
+            <div class="col-md-10">
+                @Html.DropDownList("MaKe", (SelectList)ViewBag.MaKe, "-- Chọn kệ --", new { @class = "form-control" })
+            </div>
+        </div>
+
+        <!-- Năm XB & Số trang -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Năm XB</label>
+            <div class="col-md-4">
+                @Html.TextBoxFor(m => m.NamXuatBan, new { @class = "form-control", type = "number" })
+            </div>
+
+            <label class="control-label col-md-2">Số trang</label>
+            <div class="col-md-4">
+                @Html.TextBoxFor(m => m.SoTrang, new { @class = "form-control", type = "number" })
+            </div>
+        </div>
+
+        <!-- Giá nhập & Giá bìa -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Giá nhập</label>
+            <div class="col-md-4">
+                @Html.TextBoxFor(m => m.GiaNhap, new { @class = "form-control", type = "number", step = "0.01" })
+            </div>
+
+            <label class="control-label col-md-2">Giá bìa</label>
+            <div class="col-md-4">
+                @Html.TextBoxFor(m => m.GiaBia, new { @class = "form-control", type = "number", step = "0.01" })
+            </div>
+        </div>
+
+        <!-- Số lượng -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Số lượng</label>
+            <div class="col-md-4">
+                @Html.TextBoxFor(m => m.SoLuong, new { @class = "form-control", type = "number" })
+            </div>
+
+            <label class="control-label col-md-2">Còn sẵn</label>
+            <div class="col-md-4">
+                @Html.TextBoxFor(m => m.SoLuongCoSan, new { @class = "form-control", type = "number" })
+            </div>
+        </div>
+
+        <!-- Mô tả -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Mô tả</label>
+            <div class="col-md-10">
+                @Html.TextAreaFor(m => m.MoTa, new { @class = "form-control", rows = 4 })
+            </div>
+        </div>
+
+        <!-- Ảnh bìa -->
+        <div class="form-group">
+            <label class="control-label col-md-2">Ảnh bìa (URL)</label>
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.AnhBia, new { @class = "form-control", placeholder = "https://..." })
+            </div>
+        </div>
+
+        <!-- Nút -->
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-success">
+                <i class="fa fa-save"></i> Lưu sách
+            </button>
+            <a href="@Url.Action("Index")" class="btn btn-default">
+                <i class="fa fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+}

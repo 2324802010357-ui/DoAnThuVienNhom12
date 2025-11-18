@@ -1,0 +1,95 @@
+﻿@model IEnumerable<DoAnThuVienNhom12.Models.PhieuTra>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th style="width:110px;">Mã phiếu trả</th>
+            <th style="width:110px;">Mã phiếu mượn</th>
+            <th>Độc giả</th>
+            <th>MSSV</th>
+            <th style="width:120px;">Ngày trả</th>
+            <th style="width:100px;">Số ngày trễ</th>
+            <th style="width:120px;">Phí phạt</th>
+            <th>Ghi chú</th>
+            <th style="width:80px;" class="text-center">Xóa</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                var pm = item.PhieuMuon;               // EF5 → cần Include("PhieuMuon.DocGia")
+                var docGia = pm != null ? pm.DocGia : null;
+
+                <tr>
+                    <td>@item.MaPhieuTra</td>
+
+                    <td>@item.MaPhieuMuon</td>
+
+                    <!-- Tên độc giả -->
+                    <td>@(docGia?.HoTen ?? "Không rõ")</td>
+
+                    <!-- MSSV -->
+                    <td>@(docGia?.MaSinhVien ?? "")</td>
+
+                    <!-- Ngày trả -->
+                    <td>
+                        @(item.NgayTra?.ToString("dd/MM/yyyy") ?? "")
+                    </td>
+
+                    <!-- Số ngày trễ -->
+                    <td>
+                        @if (item.SoNgayTre > 0)
+                        {
+                            <span class="label label-danger">@item.SoNgayTre ngày</span>
+                        }
+                        else
+                        {
+                            <span class="label label-success">0</span>
+                        }
+                    </td>
+
+                    <!-- Phí phạt -->
+                    <td>
+                        <strong>@String.Format("{0:N0} đ", item.TienPhat)</strong>
+                    </td>
+
+                    <!-- Ghi chú -->
+                    <td>@(item.GhiChu ?? "")</td>
+
+                    <!-- Xóa -->
+                    <td class="text-center">
+                        <button class="btn btn-xs btn-danger"
+                                onclick="xoaPhieuTra(@item.MaPhieuTra)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" class="text-center text-muted">
+                    Chưa có phiếu trả nào.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function xoaPhieuTra(id) {
+        if (!confirm("Bạn muốn xóa phiếu trả #" + id + " ?")) return;
+
+        $.post('@Url.Action("XoaPhieuTra","MuonTra")',
+            { MaPhieuTra: id },
+            function (res) {
+                alert(res.message);
+                if (res.success) location.reload();
+            }
+        );
+    }
+</script>
