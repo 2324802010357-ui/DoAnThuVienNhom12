@@ -196,12 +196,6 @@
     <Compile Include="Models\Sach.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="Models\sp_MuonSach_Result.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\sp_TimKiemSach_Result.cs">
-      <DependentUpon>Model1.tt</DependentUpon>
-    </Compile>
     <Compile Include="Models\TacGia.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>

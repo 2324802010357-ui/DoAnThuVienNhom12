@@ -176,7 +176,8 @@ $(function(){
 
         $.ajax({
             url: '@Url.Action("LaySachTuPhieuMuon","MuonTra")',
-            data: { maPhieu: maPhieu },
+            data: { maPhieu: parseInt(maPhieu) },
+
             success: function(data){
 
                 if (!data.success){

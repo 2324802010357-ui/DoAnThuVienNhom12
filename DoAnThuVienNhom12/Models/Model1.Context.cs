@@ -12,18 +12,10 @@ namespace DoAnThuVienNhom12.Models
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
-    using System.Data.Objects;
-    using System.Data.Objects.DataClasses;
-    using System.Linq;
     
     public partial class DoAnThuVienNhom12Entities : DbContext
     {
-        public DoAnThuVienNhom12Entities()
-            : base("name=DoAnThuVienNhom12Entities")
-        {
-            this.Configuration.ProxyCreationEnabled = false;
-            this.Configuration.LazyLoadingEnabled = false;
-        }
+       
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -45,64 +37,5 @@ namespace DoAnThuVienNhom12.Models
         public DbSet<Sach> Saches { get; set; }
         public DbSet<TacGia> TacGias { get; set; }
         public DbSet<VaiTro> VaiTroes { get; set; }
-    
-        public virtual ObjectResult<sp_MuonSach_Result> sp_MuonSach(Nullable<int> maDocGia, Nullable<int> maNhanVien, Nullable<int> maSach, Nullable<int> soLuong, Nullable<System.DateTime> ngayHenTra)
-        {
-            var maDocGiaParameter = maDocGia.HasValue ?
-                new ObjectParameter("MaDocGia", maDocGia) :
-                new ObjectParameter("MaDocGia", typeof(int));
-    
-            var maNhanVienParameter = maNhanVien.HasValue ?
-                new ObjectParameter("MaNhanVien", maNhanVien) :
-                new ObjectParameter("MaNhanVien", typeof(int));
-    
-            var maSachParameter = maSach.HasValue ?
-                new ObjectParameter("MaSach", maSach) :
-                new ObjectParameter("MaSach", typeof(int));
-    
-            var soLuongParameter = soLuong.HasValue ?
-                new ObjectParameter("SoLuong", soLuong) :
-                new ObjectParameter("SoLuong", typeof(int));
-    
-            var ngayHenTraParameter = ngayHenTra.HasValue ?
-                new ObjectParameter("NgayHenTra", ngayHenTra) :
-                new ObjectParameter("NgayHenTra", typeof(System.DateTime));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<sp_MuonSach_Result>("sp_MuonSach", maDocGiaParameter, maNhanVienParameter, maSachParameter, soLuongParameter, ngayHenTraParameter);
-        }
-    
-        public virtual ObjectResult<sp_TimKiemSach_Result> sp_TimKiemSach(string tuKhoa, Nullable<int> maDanhMuc, Nullable<int> maTacGia)
-        {
-            var tuKhoaParameter = tuKhoa != null ?
-                new ObjectParameter("TuKhoa", tuKhoa) :
-                new ObjectParameter("TuKhoa", typeof(string));
-    
-            var maDanhMucParameter = maDanhMuc.HasValue ?
-                new ObjectParameter("MaDanhMuc", maDanhMuc) :
-                new ObjectParameter("MaDanhMuc", typeof(int));
-    
-            var maTacGiaParameter = maTacGia.HasValue ?
-                new ObjectParameter("MaTacGia", maTacGia) :
-                new ObjectParameter("MaTacGia", typeof(int));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<sp_TimKiemSach_Result>("sp_TimKiemSach", tuKhoaParameter, maDanhMucParameter, maTacGiaParameter);
-        }
-    
-        public virtual ObjectResult<Nullable<int>> sp_TraSach(Nullable<int> maPhieuMuon, string tinhTrangSach, Nullable<decimal> tienPhat)
-        {
-            var maPhieuMuonParameter = maPhieuMuon.HasValue ?
-                new ObjectParameter("MaPhieuMuon", maPhieuMuon) :
-                new ObjectParameter("MaPhieuMuon", typeof(int));
-    
-            var tinhTrangSachParameter = tinhTrangSach != null ?
-                new ObjectParameter("TinhTrangSach", tinhTrangSach) :
-                new ObjectParameter("TinhTrangSach", typeof(string));
-    
-            var tienPhatParameter = tienPhat.HasValue ?
-                new ObjectParameter("TienPhat", tienPhat) :
-                new ObjectParameter("TienPhat", typeof(decimal));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<Nullable<int>>("sp_TraSach", maPhieuMuonParameter, tinhTrangSachParameter, tienPhatParameter);
-        }
     }
 }

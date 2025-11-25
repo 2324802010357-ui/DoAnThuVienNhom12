@@ -50,7 +50,31 @@ namespace DoAnThuVienNhom12.Controllers
         }
 
         public ActionResult PhieuMuon() => View();
-        public ActionResult PhieuTra() => View();
+        public ActionResult TaoPhieuTra() => View("PhieuTra");
+
+        public ActionResult PhieuTra(int? id)
+        {
+            if (id == null)
+                return View(); 
+
+            var pm = db.PhieuMuons
+                .Include("DocGia")
+                .Include("ChiTietPhieuMuons.Sach")
+                .FirstOrDefault(x => x.MaPhieuMuon == id.Value);
+
+            if (pm == null)
+            {
+                TempData["Error"] = "Không tìm thấy phiếu mượn!";
+                return View(); 
+            }
+
+            return View(pm);
+        }
+
+
+
+
+
 
 
         // ============================
@@ -185,12 +209,33 @@ namespace DoAnThuVienNhom12.Controllers
         // ============================
         // AJAX: LẤY SÁCH TỪ PHIẾU MƯỢN (ĐÃ FIX FULL)
         // ============================
-        public ActionResult LaySachTuPhieuMuon(int maPhieu)
+        public ActionResult LaySachTuPhieuMuon(string maPhieu)
         {
+            if (string.IsNullOrWhiteSpace(maPhieu))
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Mã phiếu mượn không hợp lệ!"
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            maPhieu = new string(maPhieu.Where(char.IsDigit).ToArray());
+
+            int id;
+            if (!int.TryParse(maPhieu, out id))
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Không thể chuyển mã phiếu sang số!"
+                }, JsonRequestBehavior.AllowGet);
+            }
+
             var pm = db.PhieuMuons
                 .Include("DocGia")
                 .Include("ChiTietPhieuMuons.Sach")
-                .FirstOrDefault(p => p.MaPhieuMuon == maPhieu);
+                .FirstOrDefault(p => p.MaPhieuMuon == id);
 
             if (pm == null)
             {
@@ -201,12 +246,13 @@ namespace DoAnThuVienNhom12.Controllers
                 }, JsonRequestBehavior.AllowGet);
             }
 
+            // 4) Lấy danh sách sách
             var books = pm.ChiTietPhieuMuons.Select(c => new
             {
                 code = c.MaSach.ToString(),
                 title = c.Sach.TenSach,
-                author = c.Sach.TacGia,
-                publisher = c.Sach.NhaXuatBan
+                author = c.Sach.TacGia?.TenTacGia ?? "",
+                publisher = c.Sach.NhaXuatBan?.TenNXB ?? ""
             }).ToList();
 
             return Json(new
@@ -217,6 +263,7 @@ namespace DoAnThuVienNhom12.Controllers
                 books = books
             }, JsonRequestBehavior.AllowGet);
         }
+
 
 
 
@@ -424,7 +471,9 @@ namespace DoAnThuVienNhom12.Controllers
                 return Json(new { success = false, message = "Lỗi server: " + ex.Message });
             }
         }
-       
+ 
+
+
 
 
 
